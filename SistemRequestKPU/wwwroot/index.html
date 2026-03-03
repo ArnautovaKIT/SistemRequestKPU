@@ -230,51 +230,85 @@
                         <div class="card-body">
                             <form id="createRequestForm">
                                 <div class="row g-3">
+                                    <!-- Шаг 1: Объект -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">1. Объект *</label>
+                                        <select class="form-select" id="technicalObject" required>
+                                            <option value="">Выберите объект</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Шаг 2: Цех -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">2. Цех *</label>
+                                        <select class="form-select" id="workshop" required disabled>
+                                            <option value="">Выберите объект сначала</option>
+                                        </select>
+                                        <small class="form-text text-muted">Загружается после выбора объекта</small>
+                                    </div>
+
+                                    <!-- Шаг 3: Технологический узел -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">3. Технологический узел</label>
+                                        <select class="form-select" id="technologicalUnit" disabled>
+                                            <option value="">Выберите цех сначала</option>
+                                        </select>
+                                        <small class="form-text text-muted">Опционально. Загружается после выбора цеха</small>
+                                    </div>
+
+                                    <!-- Шаг 4: Оборудование -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">4. Оборудование *</label>
+                                        <select class="form-select" id="equipmentInstance" required disabled>
+                                            <option value="">Выберите объект сначала</option>
+                                        </select>
+                                        <small class="form-text text-muted">Загружается после выбора объекта</small>
+                                    </div>
+
+                                    <!-- Шаг 5: Тип работ и Приоритет (в одной строке) -->
                                     <div class="col-md-6">
-                                        <label>Тип работ *</label>
+                                        <label class="form-label fw-bold">5. Тип работ *</label>
                                         <select class="form-select" id="workType" required>
+                                            <option value="">Выберите тип</option>
                                             <option value="Installation">Установка</option>
                                             <option value="Setup">Наладка</option>
                                             <option value="Repair">Ремонт</option>
                                         </select>
                                     </div>
+
                                     <div class="col-md-6">
-                                        <label>Приоритет *</label>
+                                        <label class="form-label fw-bold">5. Приоритет *</label>
                                         <select class="form-select" id="priority" required>
+                                            <option value="">Выберите приоритет</option>
                                             <option value="Low">Низкий</option>
                                             <option value="Medium">Средний</option>
                                             <option value="High">Высокий</option>
                                             <option value="Critical">Критический</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label>Цех *</label>
-                                        <select class="form-select" id="workshop" required></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Технологический узел</label>
-                                        <select class="form-select" id="technologicalUnit"></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Оборудование *</label>
-                                        <select class="form-select" id="equipmentInstance" required></select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Объект *</label>
-                                        <select class="form-select" id="technicalObject" required></select>
-                                    </div>
+
+                                    <!-- Шаг 6: Описание проблемы -->
                                     <div class="col-12">
-                                        <label>Описание проблемы *</label>
-                                        <textarea class="form-control" id="problemDescription" rows="3" required></textarea>
+                                        <label class="form-label fw-bold">6. Описание проблемы *</label>
+                                        <textarea class="form-control" id="problemDescription" rows="4" required
+                                                  placeholder="Детальное описание проблемы, неисправности или необходимых работ"></textarea>
                                     </div>
+
+                                    <!-- Шаг 7: Технические особенности -->
                                     <div class="col-12">
-                                        <label>Комментарии</label>
-                                        <textarea class="form-control" id="additionalComments" rows="3"></textarea>
+                                        <label class="form-label fw-bold">7. Технические особенности</label>
+                                        <textarea class="form-control" id="technicalSpecifications" rows="3"
+                                                  placeholder="Дополнительные технические характеристики, требования к проведению работ"></textarea>
                                     </div>
                                 </div>
+
                                 <div class="mt-4">
-                                    <button type="submit" class="btn btn-primary">Создать</button>
-                                    <button type="button" class="btn btn-secondary ms-2" data-section="requests">Отмена</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Создать заявку
+                                    </button>
+                                    <button type="button" class="btn btn-secondary ms-2" data-section="requests">
+                                        <i class="bi bi-x-circle"></i> Отмена
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -1434,6 +1468,227 @@
                     document.getElementById('editRequestForm')?.reset();
                 });
             }
+        });
+
+        // При создании заявки - добавьте слушатель на выбор цеха
+        document.getElementById('workshop')?.addEventListener('change', async (e) => {
+            const workshopId = e.target.value;
+            const unitSelect = document.getElementById('technologicalUnit');
+
+            if (!workshopId) {
+                unitSelect.innerHTML = '<option value="">Выберите цех сначала</option>';
+                unitSelect.disabled = true;
+                return;
+            }
+
+            try {
+                // Получаем только узлы, привязанные к выбранному цеху
+                const units = await api.getTechnologicalUnitsByWorkshop(workshopId);
+
+                unitSelect.innerHTML = '<option value="">— Не выбран —</option>';
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.id;
+                    option.textContent = unit.name;
+                    unitSelect.appendChild(option);
+                });
+
+                unitSelect.disabled = false;
+            } catch (error) {
+                console.error('Ошибка загрузки узлов:', error);
+                unitSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+            }
+        });
+
+        // Аналогично при редактировании
+        document.getElementById('editWorkshop')?.addEventListener('change', async (e) => {
+            const workshopId = e.target.value;
+            const unitSelect = document.getElementById('editTechnologicalUnit');
+
+            if (!workshopId) {
+                unitSelect.innerHTML = '<option value="">Выберите цех сначала</option>';
+                unitSelect.disabled = true;
+                return;
+            }
+
+            try {
+                const units = await api.getTechnologicalUnitsByWorkshop(workshopId);
+                unitSelect.innerHTML = '<option value="">— Не выбран —</option>';
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.id;
+                    option.textContent = unit.name;
+                    unitSelect.appendChild(option);
+                });
+                unitSelect.disabled = false;
+            } catch (error) {
+                unitSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+            }
+        });
+
+        // ==================== ЛОГИКА ЗАПОЛНЕНИЯ ФОРМЫ СОЗДАНИЯ ЗАЯВКИ ====================
+
+        // Инициализация при загрузке страницы
+        async function initializeCreateRequestForm() {
+            try {
+                // Загружаем все технические объекты
+                const objects = await api.getTechnicalObjects();
+                const objectSelect = document.getElementById('technicalObject');
+                objectSelect.innerHTML = '<option value="">Выберите объект</option>';
+                objects.forEach(obj => {
+                    const option = document.createElement('option');
+                    option.value = obj.id;
+                    option.textContent = obj.name;
+                    objectSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки объектов:', error);
+                showErrorAlert('Не удалось загрузить список объектов');
+            }
+        }
+
+        // Событие при выборе объекта
+        document.getElementById('technicalObject')?.addEventListener('change', async (e) => {
+            const objectId = e.target.value;
+            const workshopSelect = document.getElementById('workshop');
+            const equipmentSelect = document.getElementById('equipmentInstance');
+
+            if (!objectId) {
+                workshopSelect.innerHTML = '<option value="">Выберите объект сначала</option>';
+                workshopSelect.disabled = true;
+                equipmentSelect.innerHTML = '<option value="">Выберите объект сначала</option>';
+                equipmentSelect.disabled = true;
+                return;
+            }
+
+            try {
+                // Загружаем оборудование для этого объекта
+                const equipment = await api.getEquipmentInstancesByTechnicalObject(objectId);
+
+                equipmentSelect.innerHTML = '<option value="">Выберите оборудование</option>';
+                equipment.forEach(eq => {
+                    const option = document.createElement('option');
+                    option.value = eq.id;
+                    option.textContent = eq.equipmentType?.name || eq.equipmentTypeName || 'Неизвестное оборудование';
+                    equipmentSelect.appendChild(option);
+                });
+                equipmentSelect.disabled = false;
+
+                // Загружаем все цеха для выбора
+                const workshops = await api.getWorkshops();
+                workshopSelect.innerHTML = '<option value="">Выберите цех</option>';
+                workshops.forEach(ws => {
+                    const option = document.createElement('option');
+                    option.value = ws.id;
+                    option.textContent = ws.name;
+                    workshopSelect.appendChild(option);
+                });
+                workshopSelect.disabled = false;
+
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                showErrorAlert('Не удалось загрузить данные');
+            }
+        });
+
+        // Событие при выборе цеха
+        document.getElementById('workshop')?.addEventListener('change', async (e) => {
+            const workshopId = e.target.value;
+            const unitSelect = document.getElementById('technologicalUnit');
+
+            if (!workshopId) {
+                unitSelect.innerHTML = '<option value="">Выберите цех сначала</option>';
+                unitSelect.disabled = true;
+                return;
+            }
+
+            try {
+                // Загружаем только узлы этого цеха
+                const units = await api.getTechnologicalUnitsByWorkshop(workshopId);
+
+                unitSelect.innerHTML = '<option value="">— Не выбран —</option>';
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.id;
+                    option.textContent = unit.name;
+                    unitSelect.appendChild(option);
+                });
+
+                if (units.length > 0) {
+                    unitSelect.disabled = false;
+                } else {
+                    unitSelect.innerHTML = '<option value="">Узлы не найдены</option>';
+                    unitSelect.disabled = true;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки узлов:', error);
+                unitSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+            }
+        });
+
+        // Обработка отправки формы создания заявки
+        document.getElementById('createRequestForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                workType: document.getElementById('workType').value,
+                priority: document.getElementById('priority').value,
+                technicalObjectId: parseInt(document.getElementById('technicalObject').value),
+                workshopId: parseInt(document.getElementById('workshop').value),
+                technologicalUnitId: document.getElementById('technologicalUnit').value ?
+                    parseInt(document.getElementById('technologicalUnit').value) : null,
+                equipmentInstanceId: parseInt(document.getElementById('equipmentInstance').value),
+                problemDescription: document.getElementById('problemDescription').value,
+                technicalSpecifications: document.getElementById('technicalSpecifications').value,
+            };
+
+            // Валидация на стороне клиента
+            if (!formData.workType || !formData.priority || !formData.problemDescription) {
+                showErrorAlert('Заполните все обязательные поля (отмечены *)');
+                return;
+            }
+
+            try {
+                // Преобразуем данные в формат API
+                const requestData = {
+                    workType: formData.workType,
+                    priority: formData.priority,
+                    status: 'New',
+                    technicalSpecs: formData.technicalSpecifications,
+                    requirements: formData.problemDescription,
+                    equipmentInstanceId: formData.equipmentInstanceId,
+                    technicalObjectId: formData.technicalObjectId,
+                    workshopId: formData.workshopId,
+                    technologicalUnitId: formData.technologicalUnitId
+                };
+
+                await api.createRequest(requestData);
+                showAlert('Заявка успешно создана!', 'success');
+
+                // Сбрасываем форму
+                document.getElementById('createRequestForm').reset();
+                document.getElementById('technologicalUnit').disabled = true;
+                document.getElementById('workshop').disabled = true;
+                document.getElementById('equipmentInstance').disabled = true;
+
+                // Загружаем обновленный список заявок
+                await loadDashboard();
+
+                // Переходим на страницу всех заявок
+                document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+                document.getElementById('requests-section').style.display = 'block';
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelector('[data-section="requests"]').classList.add('active');
+
+            } catch (error) {
+                showErrorAlert(error.message || 'Не удалось создать заявку');
+                console.error('Create request error:', error);
+            }
+        });
+
+        // Инициализируем форму при загрузке приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCreateRequestForm();
         });
 
     </script>
