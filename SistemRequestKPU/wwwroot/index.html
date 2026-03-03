@@ -1,0 +1,1441 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система управления заявками КИПиА</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/jwt-decode@3.1.2/build/jwt-decode.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+        }
+
+        .sidebar {
+            background-color: var(--primary-color);
+            color: white;
+            min-height: calc(100vh - 56px);
+        }
+
+            .sidebar .nav-link {
+                color: rgba(255,255,255,0.8);
+                padding: 12px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+
+                .sidebar .nav-link:hover, .sidebar .nav-link.active {
+                    background-color: rgba(255,255,255,0.1);
+                    color: white;
+                }
+
+                .sidebar .nav-link i {
+                    margin-right: 10px;
+                }
+
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-new {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inprogress {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .priority-high {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        .priority-medium {
+            color: var(--warning-color);
+        }
+
+        .priority-low {
+            color: var(--success-color);
+        }
+
+        .action-btn {
+            margin: 2px;
+        }
+
+        /* Для обрезки длинных текстов в таблице */
+        .text-truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Для модального окна с деталями */
+        #detailsProblemDescription,
+        #detailsAdditionalComments {
+            line-height: 1.5;
+            font-family: monospace;
+            background-color: #f8f9fa;
+        }
+
+        /* Для таблицы пользователей */
+        #usersTable td, #usersTable th {
+            vertical-align: middle;
+            padding: 0.75rem;
+        }
+
+        #usersTable .badge {
+            font-size: 0.85em;
+            padding: 0.5em 0.75em;
+        }
+
+        /* Для обрезки длинных текстов */
+        .text-truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Гарантируем видимость таблицы сотрудников */
+        #users-section.table-responsive {
+            display: block !important;
+            overflow-x: auto;
+        }
+
+        #usersTable {
+            min-width: 100% !important;
+        }
+
+            #usersTable td, #usersTable th {
+                white-space: nowrap;
+                padding: 0.5rem 0.75rem;
+            }
+
+        
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="bi bi-tools"></i> Система КИПиА</a>
+            <div class="d-flex align-items-center">
+                <span class="navbar-text me-3" id="userInfo">Загрузка...</span>
+                <button class="btn btn-outline-light btn-sm" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Выйти</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar">
+                <ul class="nav flex-column pt-3">
+                    <li class="nav-item"><a class="nav-link active" href="#" data-section="dashboard"><i class="bi bi-speedometer2"></i> Панель</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-section="requests"><i class="bi bi-list-task"></i> Все заявки</a></li>
+                    <li class="nav-item" id="createRequestMenuItem"><a class="nav-link" href="#" data-section="create-request"><i class="bi bi-plus-circle"></i> Новая заявка</a></li>
+                    <li class="nav-item" id="usersMenuItem"><a class="nav-link" href="#" data-section="users"><i class="bi bi-people"></i> Сотрудники</a></li>
+                </ul>
+            </div>
+
+            <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Дашборд -->
+                <div id="dashboard-section" class="content-section">
+                    <h1 class="h2 my-4">Панель управления</h1>
+                    <div class="row mb-4">
+                        <div class="col-md-3"><div class="card text-center p-3"><div class="fs-4 fw-bold text-primary" id="newRequestsCount">0</div><div>Новые</div></div></div>
+                        <div class="col-md-3"><div class="card text-center p-3"><div class="fs-4 fw-bold text-warning" id="inProgressCount">0</div><div>В работе</div></div></div>
+                        <div class="col-md-3"><div class="card text-center p-3"><div class="fs-4 fw-bold text-success" id="completedCount">0</div><div>Выполнено</div></div></div>
+                        <div class="col-md-3"><div class="card text-center p-3"><div class="fs-4 fw-bold text-danger" id="rejectedCount">0</div><div>Отклонено</div></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <span>Последние заявки</span>
+                            <a href="#" data-section="requests" class="btn btn-sm btn-outline-primary">Все заявки</a>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-hover"><tbody id="recentRequestsTable"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Все заявки -->
+                <div id="requests-section" class="content-section" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center my-4">
+                        <h1 class="h2">Все заявки</h1>
+                        <button class="btn btn-primary" id="createRequestBtn"><i class="bi bi-plus-circle"></i> Новая заявка</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Тип</th>
+                                            <th>Оборудование</th>
+                                            <th>Объект</th>
+                                            <th>Цех</th>
+                                            <th>Тех. узел</th>
+                                            <th>Статус</th>
+                                            <th>Приоритет</th>
+                                            <th>Исполнитель</th>
+                                            <th>Дата</th>
+                                            <th>Детали</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="requestsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Создание заявки -->
+                <div id="create-request-section" class="content-section" style="display:none;">
+                    <h1 class="h2 my-4">Новая заявка</h1>
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="createRequestForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label>Тип работ *</label>
+                                        <select class="form-select" id="workType" required>
+                                            <option value="Installation">Установка</option>
+                                            <option value="Setup">Наладка</option>
+                                            <option value="Repair">Ремонт</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Приоритет *</label>
+                                        <select class="form-select" id="priority" required>
+                                            <option value="Low">Низкий</option>
+                                            <option value="Medium">Средний</option>
+                                            <option value="High">Высокий</option>
+                                            <option value="Critical">Критический</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Цех *</label>
+                                        <select class="form-select" id="workshop" required></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Технологический узел</label>
+                                        <select class="form-select" id="technologicalUnit"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Оборудование *</label>
+                                        <select class="form-select" id="equipmentInstance" required></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Объект *</label>
+                                        <select class="form-select" id="technicalObject" required></select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label>Описание проблемы *</label>
+                                        <textarea class="form-control" id="problemDescription" rows="3" required></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label>Комментарии</label>
+                                        <textarea class="form-control" id="additionalComments" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="submit" class="btn btn-primary">Создать</button>
+                                    <button type="button" class="btn btn-secondary ms-2" data-section="requests">Отмена</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Управление сотрудниками -->
+                <div id="users-section" class="content-section" style="display:none;">
+                    <div class="d-flex justify-content-between align-items-center my-4">
+                        <h1 class="h2">Управление сотрудниками</h1>
+                        <button class="btn btn-primary" id="createUserBtn"><i class="bi bi-plus-circle"></i> Новый сотрудник</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Логин</th>
+                                            <th>Email</th>
+                                            <th>Роль</th>
+                                            <th>Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Модалка создания/редактирования сотрудника -->
+                <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true" aria-labelledby="userModalTitle">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userModalTitle">Новый сотрудник</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="userForm" class="needs-validation" novalidate>
+                                    <input type="hidden" id="userId">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Логин *</label>
+                                            <input type="text" class="form-control" id="username" required>
+                                            <div class="invalid-feedback">Логин обязателен</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" id="passwordLabel">Пароль *</label>
+                                            <input type="password" class="form-control" id="password" required>
+                                            <div class="invalid-feedback">Пароль обязателен</div>
+                                            <div class="form-text">Минимум 6 символов</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email *</label>
+                                            <input type="email" class="form-control" id="email" required>
+                                            <div class="invalid-feedback">Неверный формат email</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Роль *</label>
+                                            <select class="form-select" id="role" required>
+                                                <option value="">Выберите роль</option>
+                                                <option value="Executor">Исполнитель</option>
+                                                <option value="Dispatcher">Диспетчер</option>
+                                                <option value="Admin">Администратор</option>
+                                            </select>
+                                            <div class="invalid-feedback">Роль обязательна</div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="button" class="btn btn-primary" id="saveUserBtn">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Модалка редактирования (обновлена для новых полей) -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактирование заявки</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRequestForm">
+                        <input type="hidden" id="editRequestId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Тип работ</label>
+                                <select class="form-select" id="editWorkType" required>
+                                    <option value="Installation">Установка</option>
+                                    <option value="Setup">Наладка</option>
+                                    <option value="Repair">Ремонт</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Приоритет</label>
+                                <select class="form-select" id="editPriority" required>
+                                    <option value="Low">Низкий</option>
+                                    <option value="Medium">Средний</option>
+                                    <option value="High">Высокий</option>
+                                    <option value="Critical">Критический</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Цех</label>
+                                <select class="form-select" id="editWorkshop" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Технологический узел</label>
+                                <select class="form-select" id="editTechnologicalUnit"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Оборудование</label>
+                                <select class="form-select" id="editEquipmentInstance" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Объект</label>
+                                <select class="form-select" id="editTechnicalObject" required></select>
+                            </div>
+                            <div class="col-12">
+                                <label>Описание проблемы</label>
+                                <textarea class="form-control" id="editProblemDescription" rows="3" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label>Комментарии</label>
+                                <textarea class="form-control" id="editAdditionalComments" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveEditBtn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка смены статуса (не изменилась) -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Изменить статус</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Заявка: <strong id="statusModalNumber"></strong></p>
+                    <select class="form-select" id="statusSelect">
+                        <option value="New">Новая</option>
+                        <option value="InProgress">В работе</option>
+                        <option value="Completed">Выполнена</option>
+                        <option value="Rejected">Отклонена</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveStatusBtn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка назначения исполнителя (не изменилась) -->
+    <div class="modal fade" id="assignModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Назначить исполнителя</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Заявка: <strong id="assignModalNumber"></strong></p>
+                    <select class="form-select" id="assignSelect">
+                        <option value="">— Не назначен —</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveAssignBtn">Назначить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для отображения подробной информации о заявке -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Подробная информация о заявке</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Описание проблемы</label>
+                        <div id="detailsProblemDescription" class="border p-3 bg-light rounded" style="min-height: 100px; white-space: pre-wrap;"></div>
+                    </div>
+                    <div>
+                        <label class="form-label fw-bold">Комментарии</label>
+                        <div id="detailsAdditionalComments" class="border p-3 bg-light rounded" style="min-height: 100px; white-space: pre-wrap;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let currentRequests = [];
+        let currentEditRequest = null; // Исправлено: добавлена глобальная переменная
+        let currentUsers = []; // Добавляем массив для пользователей
+        let currentEditUser = null; // Добавляем переменную для редактируемого пользователя
+
+        const api = {
+            baseUrl: '/api',
+            async request(endpoint, options = {}) {
+                const token = localStorage.getItem('token');
+                const config = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { 'Authorization': `Bearer ${token}` })
+                    },
+                    ...options
+                };
+                try {
+                    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+                    if (response.status === 401) {
+                        localStorage.removeItem('token');
+                        window.location.href = '/login.html';
+                        return null;
+                    }
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API Error [${endpoint}]:`, error);
+                    throw error;
+                }
+            },
+            getRequests: () => api.request('/requests'),
+            createRequest: (d) => api.request('/requests', { method: 'POST', body: JSON.stringify(d) }),
+            updateRequest: (id, d) => api.request(`/requests/${id}`, { method: 'PUT', body: JSON.stringify(d) }),
+            updateStatus: (id, s) => api.request(`/requests/${id}/status`, { method: 'PUT', body: JSON.stringify(s) }),
+            assignExecutor: (id, aid) => api.request(`/requests/${id}/assign`, { method: 'PUT', body: JSON.stringify({ assigneeId: aid }) }),
+            deleteRequest: (id) => api.request(`/requests/${id}`, { method: 'DELETE' }),
+            getWorkshops: () => api.request('/workshops'),
+            getTechnologicalUnits: () => api.request('/technologicalunits'),
+            getTechnologicalUnitsByWorkshop: (workshopId) => api.request(`/technologicalunits/by-workshop/${workshopId}`),
+            getEquipmentInstances: () => api.request('/equipmentinstances'),
+            getEquipmentInstancesByTechnicalObject: (objectId) => api.request(`/equipmentinstances/by-technical-object/${objectId}`),
+            getTechnicalObjects: () => api.request('/technicalobjects'),
+            getUsers: () => api.request('/users'),
+            getUser: (id) => api.request(`/users/${id}`),
+            createUser: (data) => api.request('/users', { method: 'POST', body: JSON.stringify(data) }),
+            updateUser: (id, data) => api.request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+            deleteUser: (id) => api.request(`/users/${id}`, { method: 'DELETE' })
+        };
+
+        // Добавьте эти функции в глобальную область видимости
+        window.openStatusModal = function (id) {
+            const request = currentRequests.find(r => r.id === id);
+            if (!request) return;
+
+            document.getElementById('statusModalNumber').textContent = request.uniqueNumber;
+            document.getElementById('statusSelect').value = request.status;
+            document.getElementById('saveStatusBtn').dataset.requestId = id;
+
+            new bootstrap.Modal(document.getElementById('statusModal')).show();
+        };
+
+        window.openAssignModal = function (id) {
+            const request = currentRequests.find(r => r.id === id);
+            if (!request) return;
+
+            document.getElementById('assignModalNumber').textContent = request.uniqueNumber;
+
+            // Загружаем исполнителей
+            api.getUsers().then(users => {
+                const executorSelect = document.getElementById('assignSelect');
+                executorSelect.innerHTML = '<option value="">— Не назначен —</option>';
+
+                const executors = users.filter(u => u.role === 'Executor');
+                executors.forEach(executor => {
+                    const option = document.createElement('option');
+                    option.value = executor.id;
+                    option.textContent = executor.username;
+                    if (request.assigneeId === executor.id) {
+                        option.selected = true;
+                    }
+                    executorSelect.appendChild(option);
+                });
+            });
+
+            document.getElementById('saveAssignBtn').dataset.requestId = id;
+            new bootstrap.Modal(document.getElementById('assignModal')).show();
+        };
+
+        const utils = {
+            formatDate: (d) => new Date(d).toLocaleString('ru-RU'),
+            getStatusBadge: (s) => {
+                const map = {
+                    New: { text: 'Новая', className: 'status-new' },
+                    InProgress: { text: 'В работе', className: 'status-inprogress' },
+                    Completed: { text: 'Выполнена', className: 'status-completed' },
+                    Rejected: { text: 'Отклонена', className: 'status-rejected' }
+                };
+                const statusInfo = map[s] || { text: 'Неизвестно', className: 'status-unknown' };
+                return `<span class="status-badge ${statusInfo.className}">${statusInfo.text}</span>`;
+            },
+            getPriorityClass: (p) => {
+                const classes = {
+                    Low: 'priority-low',
+                    Medium: 'priority-medium',
+                    High: 'priority-high',
+                    Critical: 'priority-critical'
+                };
+                return classes[p] || 'priority-normal';
+            },
+            getPriorityText: (p) => {
+                const texts = {
+                    Low: 'Низкий',
+                    Medium: 'Средний',
+                    High: 'Высокий',
+                    Critical: 'Критический'
+                };
+                return texts[p] || p;
+            }
+        };
+
+        function showAlert(msg, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `alert alert-${type} position-fixed shadow`;
+            div.style = 'top: 10px; right: 10px; z-index: 9999; max-width: 400px;';
+            div.innerHTML = `<div class="d-flex align-items-center">${msg}</div>`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        function showErrorAlert(errorMsg) {
+            showAlert(`Ошибка: ${errorMsg}`, 'danger');
+        }
+
+        // Инициализация
+        function initializeApp() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const payload = jwt_decode(token);
+                currentUser = {
+                    id: parseInt(payload.nameid),
+                    username: payload.unique_name,
+                    role: payload.role
+                };
+                document.getElementById('userInfo').textContent = `${currentUser.username} (${currentUser.role})`;
+
+                // Скрыть пункт меню для создания заявки, если роль не поддерживается
+                const createMenuItem = document.getElementById('createRequestMenuItem');
+                if (createMenuItem && !['Applicant', 'Dispatcher', 'Admin'].includes(currentUser.role)) {
+                    createMenuItem.style.display = 'none';
+                }
+                setupUserManagement();
+
+                loadDashboard();
+            } catch (e) {
+                console.error('Token validation error:', e);
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                currentRequests = await api.getRequests();
+                updateStats();
+                renderTable(currentRequests.slice(0, 5), 'recentRequestsTable');
+                renderTable(currentRequests, 'requestsTable');
+            } catch (error) {
+                showErrorAlert('Не удалось загрузить заявки');
+                console.error('Dashboard load error:', error);
+            }
+        }
+
+        function updateStats() {
+            const stats = { New: 0, InProgress: 0, Completed: 0, Rejected: 0 };
+            currentRequests.forEach(r => stats[r.status]++);
+            document.getElementById('newRequestsCount').textContent = stats.New;
+            document.getElementById('inProgressCount').textContent = stats.InProgress;
+            document.getElementById('completedCount').textContent = stats.Completed;
+            document.getElementById('rejectedCount').textContent = stats.Rejected;
+        }
+
+        function renderTable(requests, tableId) {
+            const tbody = document.getElementById(tableId);
+            if (!tbody) return;
+
+            if (requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" class="text-center py-4">Нет заявок</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = requests.map(r => {
+                // Проверяем структуру данных с безопасным доступом
+                const equipmentName = r.equipmentInstance?.name ||
+                    r.equipmentInstanceName ||
+                    'Неизвестное оборудование';
+                const objectName = r.technicalObject?.name ||
+                    r.technicalObjectName ||
+                    '—';
+                const workshopName = r.workshop?.name ||
+                    r.workshopName ||
+                    '—';
+                const technologicalUnitName = r.technologicalUnit?.name ||
+                    r.technologicalUnitName ||
+                    '—';
+
+                return `
+                            <tr>
+                                <td>${r.uniqueNumber}</td>
+                                <td>${utils.getWorkTypeText(r.workType)}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="${equipmentName}">${equipmentName}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="${objectName}">${objectName}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="${workshopName}">${workshopName}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="${technologicalUnitName}">${technologicalUnitName}</td>
+                                <td>${utils.getStatusBadge(r.status)}</td>
+                                <td class="${utils.getPriorityClass(r.priority)}">${utils.getPriorityText(r.priority)}</td>
+                                <td class="text-truncate" style="max-width: 120px;" title="${r.assignee?.username || r.assigneeUsername || ''}">${r.assignee?.username || r.assigneeUsername || '—'}</td>
+                                <td>${r.createdAt}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info"
+                                            onclick="showDetails(${r.id})"
+                                            title="Показать подробную информацию">
+                                        <i class="bi bi-info-circle"></i> Инфо
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary action-btn me-1"
+                                            onclick="editRequest(${r.id})"
+                                            title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger action-btn me-1"
+                                            onclick="deleteRequest(${r.id})"
+                                            title="Удалить">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    ${['Dispatcher', 'Executor', 'Admin'].includes(currentUser.role) ?
+                        `<button class="btn btn-sm btn-outline-warning action-btn me-1"
+                                                 onclick="openStatusModal(${r.id})"
+                                                 title="Изменить статус">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>` : ''}
+                                    ${['Dispatcher', 'Admin'].includes(currentUser.role) ?
+                        `<button class="btn btn-sm btn-outline-info action-btn"
+                                                 onclick="openAssignModal(${r.id})"
+                                                 title="Назначить исполнителя">
+                                            <i class="bi bi-person-plus"></i>
+                                        </button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+            }).join('');
+        }
+
+        // =============================== УПРАВЛЕНИЕ СОТРУДНИКАМИ ==================================
+        // Загрузка списка пользователей
+        async function loadUsers() {
+            console.log("Запрос к API /users начат");
+            try {
+                const users = await api.getUsers();
+                console.log("Полученные данные от API:", users);
+                renderUsersTable(users);
+            } catch (error) {
+                console.error('Users load error:', error);
+                showErrorAlert('Не удалось загрузить список пользователей');
+            }
+        }
+
+        // Отображение таблицы пользователей
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('usersTable');
+            if (!tbody) {
+                console.error("Элемент usersTable не найден в DOM");
+                return;
+            }
+
+            console.log("Рендеринг таблицы сотрудников. Количество записей:", users.length);
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Нет сотрудников</td></tr>';
+                return;
+            }
+
+            // ИСПРАВЛЕНО: удаляем переносы строк и лишние отступы в шаблонной строке
+            tbody.innerHTML = users.map(u =>
+                `<tr>
+                    <td>${u.id}</td>
+                    <td class="text-truncate" style="max-width: 150px;" title="${u.username}">${u.username}</td>
+                    <td class="text-truncate" style="max-width: 200px;" title="${u.email}">${u.email}</td>
+                    <td>
+                        <span class="badge ${u.role === 'Admin' ? 'bg-danger' :
+                    u.role === 'Dispatcher' ? 'bg-warning text-dark' :
+                        'bg-success'}">
+                            ${u.role === 'Executor' ? 'Исполнитель' :
+                    u.role === 'Dispatcher' ? 'Диспетчер' : 'Администратор'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary me-1"
+                                onclick="editUser(${u.id})"
+                                title="Редактировать">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        ${u.role !== 'Admin' || currentUser.role === 'Admin' ?
+                    `<button class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteUser(${u.id})"
+                                    title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>` : ''}
+                    </td>
+                </tr>`
+            ).join('').replace(/\n\s*/g, ''); // Удаляем все переносы строк и лишние пробелы
+        }
+
+        // Открытие модалки для создания нового сотрудника
+        document.getElementById('createUserBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+
+            document.getElementById('userModalTitle').textContent = 'Новый сотрудник';
+            document.getElementById('userId').value = '';
+            document.getElementById('userForm').reset();
+            document.getElementById('passwordLabel').textContent = 'Пароль *';
+            document.getElementById('password').required = true;
+
+            // Скрываем сообщения об ошибок
+            document.querySelectorAll('.text-danger').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        });
+
+        // Редактирование пользователя
+        window.editUser = async (id) => {
+            try {
+                // ИСПРАВЛЕНО: используем специализированный метод api.getUser
+                const user = await api.getUser(id);
+                document.getElementById('userModalTitle').textContent = 'Редактирование сотрудника';
+                document.getElementById('userId').value = user.id;
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                document.getElementById('role').value = user.role;
+
+                // Для редактирования пароль не обязателен
+                document.getElementById('passwordLabel').textContent = 'Пароль (оставьте пустым для сохранения текущего)';
+                document.getElementById('password').required = false;
+
+                // Скрываем сообщения об ошибок
+                document.querySelectorAll('.text-danger').forEach(el => {
+                    el.style.display = 'none';
+                    el.textContent = '';
+                });
+
+                new bootstrap.Modal(document.getElementById('userModal')).show();
+            } catch (error) {
+                showErrorAlert('Не удалось загрузить данные сотрудника');
+                console.error('User edit error:', error);
+            }
+        };
+
+        // Сохранение пользователя
+        document.getElementById('saveUserBtn')?.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const role = document.getElementById('role').value;
+
+            // Сброс ошибок
+            document.querySelectorAll('.text-danger').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+
+            let isValid = true;
+
+            // Валидация на стороне клиента
+            if (!username) {
+                document.getElementById('usernameError').textContent = 'Логин обязателен';
+                document.getElementById('usernameError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!userId && (!password || password.length < 6)) {
+                document.getElementById('passwordError').textContent = 'Пароль должен быть не менее 6 символов';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email обязателен';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                document.getElementById('emailError').textContent = 'Неверный формат email';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const data = {
+                username,
+                password: password || undefined,
+                email,
+                role
+            };
+
+            try {
+                if (userId) {
+                    await api.updateUser(userId, data);
+                    showAlert('Сотрудник успешно обновлен!', 'success');
+                } else {
+                    await api.createUser(data);
+                    showAlert('Сотрудник успешно добавлен!', 'success');
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                loadUsers();
+            } catch (error) {
+                if (error.message.includes('HTTP 400')) {
+                    try {
+                        const errorData = JSON.parse(error.message.replace('HTTP 400: ', ''));
+                        if (errorData.errors) {
+                            if (errorData.errors.Username) {
+                                document.getElementById('usernameError').textContent = errorData.errors.Username[0];
+                                document.getElementById('usernameError').style.display = 'block';
+                            }
+                            if (errorData.errors.Email) {
+                                document.getElementById('emailError').textContent = errorData.errors.Email[0];
+                                document.getElementById('emailError').style.display = 'block';
+                            }
+                        } else {
+                            showErrorAlert(errorData);
+                        }
+                    } catch (e) {
+                        showErrorAlert('Ошибка валидации данных');
+                    }
+                } else {
+                    showErrorAlert(error.message || 'Не удалось сохранить сотрудника');
+                }
+                console.error('User save error:', error);
+            }
+        });
+
+        // Удаление пользователя
+        window.deleteUser = async (id) => {
+            if (!confirm('Вы уверены, что хотите удалить этого сотрудника? Это действие нельзя отменить.')) return;
+
+            try {
+                await api.deleteUser(id);
+                showAlert('Сотрудник успешно удален', 'success');
+                loadUsers();
+            } catch (error) {
+                showErrorAlert('Не удалось удалить сотрудника');
+                console.error('User delete error:', error);
+            }
+        };
+
+        // Навигация к разделу сотрудников
+        document.getElementById('usersMenuItem')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            document.getElementById('users-section').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            e.target.classList.add('active');
+            loadUsers();
+        });
+
+        // Проверка прав для отображения пункта меню
+        function setupUserManagement() {
+            const usersMenuItem = document.getElementById('usersMenuItem');
+            if (!usersMenuItem) {
+                console.error("Элемент usersMenuItem не найден");
+                return;
+            }
+
+            console.log("Текущая роль пользователя:", currentUser.role);
+
+            if (['Dispatcher', 'Admin'].includes(currentUser.role)) {
+                console.log("Показываем пункт меню для сотрудников");
+                usersMenuItem.style.display = 'block';
+            } else {
+                console.log("Скрываем пункт меню для сотрудников");
+                usersMenuItem.style.display = 'none';
+            }
+        }
+        // ==================================================================================
+
+        // Добавлено: метод для получения текстового представления типа работ
+        utils.getWorkTypeText = (workType) => {
+            const texts = {
+                Installation: 'Установка',
+                Setup: 'Наладка',
+                Repair: 'Ремонт'
+            };
+            return texts[workType] || workType;
+        };
+
+        // Создание заявки
+        document.getElementById('createRequestForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const data = {
+                    workType: document.getElementById('workType').value,
+                    priority: document.getElementById('priority').value,
+                    problemDescription: document.getElementById('problemDescription').value,
+                    additionalComments: document.getElementById('additionalComments').value || null,
+                    equipmentInstanceId: +document.getElementById('equipmentInstance').value,
+                    technicalObjectId: +document.getElementById('technicalObject').value,
+                    workshopId: +document.getElementById('workshop').value,
+                    technologicalUnitId: +document.getElementById('technologicalUnit').value || null
+                };
+
+                // Валидация обязательных полей
+                if (!data.equipmentInstanceId || !data.technicalObjectId || !data.workshopId) {
+                    throw new Error('Пожалуйста, заполните все обязательные поля');
+                }
+
+                await api.createRequest(data);
+                showAlert('Заявка создана!');
+                loadDashboard();
+                document.querySelector('[data-section="requests"]').click();
+            } catch (error) {
+                showErrorAlert(error.message || 'Не удалось создать заявку');
+                console.error('Create request error:', error);
+            }
+        });
+
+        // Редактирование
+        window.editRequest = async (id) => {
+            const request = currentRequests.find(r => r.id === id);
+            if (!request) {
+                showErrorAlert('Заявка не найдена');
+                return;
+            }
+            currentEditRequest = request;
+
+            try {
+                // Заполнение основных данных
+                document.getElementById('editRequestId').value = request.id;
+                document.getElementById('editWorkType').value = request.workType;
+                document.getElementById('editPriority').value = request.priority;
+                document.getElementById('editProblemDescription').value = request.technicalSpecs;
+                document.getElementById('editAdditionalComments').value = request.requirements || '';
+                document.getElementById('editEquipmentInstance').value = request.equipmentInstanceId;
+                document.getElementById('editTechnicalObject').value = request.technicalObjectId;
+                document.getElementById('editWorkshop').value = request.workshopId;
+                document.getElementById('editTechnologicalUnit').value = request.technologicalUnitId || '';
+
+                // Сначала загружаем технологические узлы для этого цеха
+                if (request.workshopId) {
+                    const units = await api.getTechnologicalUnitsByWorkshop(request.workshopId);
+                    const unitSelect = document.getElementById('editTechnologicalUnit');
+                    unitSelect.innerHTML = '<option value="">— Не выбрано —</option>' +
+                        units.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+
+                    // Устанавливаем значение после загрузки
+                    if (request.technologicalUnitId) {
+                        document.getElementById('editTechnologicalUnit').value = request.technologicalUnitId;
+                    }
+                }
+
+                // Заполнение объекта
+                document.getElementById('editTechnicalObject').value = request.technicalObjectId;
+
+                // Сначала загружаем оборудование для этого объекта
+                if (request.technicalObjectId) {
+                    const instances = await api.getEquipmentInstancesByTechnicalObject(request.technicalObjectId);
+                    const instanceSelect = document.getElementById('editEquipmentInstance');
+                    instanceSelect.innerHTML = '<option value="">— Не выбрано —</option>' +
+                        instances.map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+
+                    // Устанавливаем значение после загрузки
+                    document.getElementById('editEquipmentInstance').value = request.equipmentInstanceId;
+                }
+
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            } catch (error) {
+                showErrorAlert('Не удалось загрузить данные для редактирования');
+                console.error('Edit request error:', error);
+            }
+        };
+
+        document.getElementById('saveEditBtn')?.addEventListener('click', async () => {
+            try {
+                const data = {
+                    workType: document.getElementById('editWorkType').value,
+                    priority: document.getElementById('editPriority').value,
+                    problemDescription: document.getElementById('editProblemDescription').value,
+                    additionalComments: document.getElementById('editAdditionalComments').value || null,
+                    equipmentInstanceId: +document.getElementById('editEquipmentInstance').value,
+                    technicalObjectId: +document.getElementById('editTechnicalObject').value,
+                    workshopId: +document.getElementById('editWorkshop').value,
+                    technologicalUnitId: +document.getElementById('editTechnologicalUnit').value || null
+                };
+
+                // Валидация обязательных полей
+                if (!data.equipmentInstanceId || !data.technicalObjectId || !data.workshopId) {
+                    throw new Error('Пожалуйста, заполните все обязательные поля');
+                }
+
+                await api.updateRequest(currentEditRequest.id, data);
+                showAlert('Заявка обновлена!');
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                loadDashboard();
+            } catch (error) {
+                showErrorAlert(error.message || 'Не удалось обновить заявку');
+                console.error('Update request error:', error);
+            }
+        });
+
+        // Удаление заявки
+        window.deleteRequest = async (id) => {
+            if (!confirm('Вы уверены, что хотите удалить эту заявку?')) return;
+
+            try {
+                await api.deleteRequest(id);
+                showAlert('Заявка удалена', 'success');
+                loadDashboard();
+            } catch (error) {
+                showErrorAlert('Не удалось удалить заявку');
+                console.error('Delete request error:', error);
+            }
+        };
+
+        // Показать подробную информацию о заявке
+        window.showDetails = function (id) {
+            const request = currentRequests.find(r => r.id === id);
+            if (!request) return;
+
+            // Устанавливаем текст в модальное окно
+            document.getElementById('detailsProblemDescription').textContent = request.technicalSpecs || 'Описание проблемы отсутствует';
+            document.getElementById('detailsAdditionalComments').textContent = request.requirements || 'Комментарии отсутствуют';
+
+            // Открываем модальное окно
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        };
+
+        // Загрузка справочников для форм
+        document.querySelector('[data-section="create-request"]')?.addEventListener('click', async () => {
+            try {
+                // Загружаем базовые справочники
+                const [workshops, objects] = await Promise.all([
+                    api.getWorkshops(),
+                    api.getTechnicalObjects()
+                ]);
+
+                // Заполняем цеха и объекты
+                fillSelect('workshop', workshops, 'id', 'name');
+                fillSelect('editWorkshop', workshops, 'id', 'name');
+                fillSelect('technicalObject', objects, 'id', 'name');
+                fillSelect('editTechnicalObject', objects, 'id', 'name');
+
+                // Очищаем зависимые списки
+                const clearDependentSelects = (prefix = '') => {
+                    const selects = [
+                        `${prefix}technologicalUnit`,
+                        `${prefix}equipmentInstance`
+                    ];
+                    selects.forEach(id => {
+                        const select = document.getElementById(id);
+                        if (select) {
+                            select.innerHTML = '<option value="">— Сначала выберите основное значение —</option>';
+                            select.disabled = true;
+                        }
+                    });
+                };
+
+                clearDependentSelects();
+                clearDependentSelects('edit');
+
+                // Устанавливаем обработчики для динамической загрузки
+                setupDependentSelects();
+
+            } catch (error) {
+                showErrorAlert('Не удалось загрузить справочники');
+                console.error('Reference data load error:', error);
+            }
+        });
+
+        // Настройка зависимых выпадающих списков
+        function setupDependentSelects() {
+            // Для формы создания
+            const workshopSelect = document.getElementById('workshop');
+            const techObjectSelect = document.getElementById('technicalObject');
+
+            if (workshopSelect) {
+                workshopSelect.addEventListener('change', async (e) => {
+                    const workshopId = e.target.value;
+                    const unitSelect = document.getElementById('technologicalUnit');
+
+                    if (unitSelect) {
+                        unitSelect.disabled = !workshopId;
+                        if (!workshopId) {
+                            unitSelect.innerHTML = '<option value="">— Сначала выберите цех —</option>';
+                            return;
+                        }
+
+                        try {
+                            const units = await api.getTechnologicalUnitsByWorkshop(workshopId);
+                            fillSelect('technologicalUnit', units, 'id', 'name');
+                        } catch (error) {
+                            unitSelect.innerHTML = '<option value="">— Ошибка загрузки —</option>';
+                            showErrorAlert('Не удалось загрузить технологические узлы');
+                        }
+                    }
+                });
+            }
+
+            if (techObjectSelect) {
+                techObjectSelect.addEventListener('change', async (e) => {
+                    const objectId = e.target.value;
+                    const instanceSelect = document.getElementById('equipmentInstance');
+
+                    if (instanceSelect) {
+                        instanceSelect.disabled = !objectId;
+                        if (!objectId) {
+                            instanceSelect.innerHTML = '<option value="">— Сначала выберите объект —</option>';
+                            return;
+                        }
+
+                        try {
+                            const instances = await api.getEquipmentInstancesByTechnicalObject(objectId);
+                            fillSelect('equipmentInstance', instances, 'id', 'name');
+                        } catch (error) {
+                            instanceSelect.innerHTML = '<option value="">— Ошибка загрузки —</option>';
+                            showErrorAlert('Не удалось загрузить оборудование');
+                        }
+                    }
+                });
+            }
+
+            // Для формы редактирования
+            const editWorkshopSelect = document.getElementById('editWorkshop');
+            const editTechObjectSelect = document.getElementById('editTechnicalObject');
+
+            if (editWorkshopSelect) {
+                editWorkshopSelect.addEventListener('change', async (e) => {
+                    const workshopId = e.target.value;
+                    const unitSelect = document.getElementById('editTechnologicalUnit');
+
+                    if (unitSelect) {
+                        unitSelect.disabled = !workshopId;
+                        if (!workshopId) {
+                            unitSelect.innerHTML = '<option value="">— Сначала выберите цех —</option>';
+                            return;
+                        }
+
+                        try {
+                            const units = await api.getTechnologicalUnitsByWorkshop(workshopId);
+                            fillSelect('editTechnologicalUnit', units, 'id', 'name');
+                        } catch (error) {
+                            unitSelect.innerHTML = '<option value="">— Ошибка загрузки —</option>';
+                            showErrorAlert('Не удалось загрузить технологические узлы');
+                        }
+                    }
+                });
+            }
+
+            if (editTechObjectSelect) {
+                editTechObjectSelect.addEventListener('change', async (e) => {
+                    const objectId = e.target.value;
+                    const instanceSelect = document.getElementById('editEquipmentInstance');
+
+                    if (instanceSelect) {
+                        instanceSelect.disabled = !objectId;
+                        if (!objectId) {
+                            instanceSelect.innerHTML = '<option value="">— Сначала выберите объект —</option>';
+                            return;
+                        }
+
+                        try {
+                            const instances = await api.getEquipmentInstancesByTechnicalObject(objectId);
+                            fillSelect('editEquipmentInstance', instances, 'id', 'name');
+                        } catch (error) {
+                            instanceSelect.innerHTML = '<option value="">— Ошибка загрузки —</option>';
+                            showErrorAlert('Не удалось загрузить оборудование');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Универсальная функция для заполнения выпадающих списков
+        function fillSelect(id, items, valueKey = 'id', textKey = 'name') {
+            const select = document.getElementById(id);
+            if (!select) return;
+
+            // Сохраняем текущее значение, если оно существует
+            const currentValue = select.value;
+
+            select.innerHTML = '<option value="">— Выберите —</option>' +
+                (items?.map(i => `<option value="${i[valueKey]}">${i[textKey]}</option>`).join('') || '');
+
+            // Восстанавливаем значение, если оно было и присутствует в новых данных
+            if (currentValue && items?.some(i => i[valueKey] == currentValue)) {
+                select.value = currentValue;
+            }
+
+            select.disabled = false;
+        }
+
+        // Навигация
+        document.querySelectorAll('[data-section]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+                const section = document.getElementById(el.dataset.section + '-section');
+                if (section) section.style.display = 'block';
+
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                el.classList.add('active');
+
+                if (el.dataset.section !== 'create-request') {
+                    loadDashboard();
+                }
+            });
+        });
+
+        document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+            const requestId = document.getElementById('saveStatusBtn').dataset.requestId;
+            const newStatus = document.getElementById('statusSelect').value;
+
+            try {
+                await api.updateStatus(requestId, newStatus);
+                showAlert('Статус обновлен!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+                loadDashboard();
+            } catch (error) {
+                showErrorAlert('Не удалось изменить статус');
+                console.error('Status update error:', error);
+            }
+        });
+
+        document.getElementById('saveAssignBtn').addEventListener('click', async () => {
+            const requestId = document.getElementById('saveAssignBtn').dataset.requestId;
+            const assigneeId = document.getElementById('assignSelect').value;
+
+            try {
+                await api.assignExecutor(requestId, assigneeId);
+                showAlert('Исполнитель назначен!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
+                loadDashboard();
+            } catch (error) {
+                showErrorAlert('Не удалось назначить исполнителя');
+                console.error('Assign executor error:', error);
+            }
+        });
+
+        // Кнопка "Новая заявка" на странице всех заявок
+        document.getElementById('createRequestBtn')?.addEventListener('click', () => {
+            document.querySelector('[data-section="create-request"]').click();
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+
+        // Добавьте этот код в раздел инициализации ПОЬЗОВАТЕЛИ
+        document.getElementById('userForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('saveUserBtn')?.click();
+        });
+
+        // Навигация к разделу сотрудников
+        document.getElementById('usersMenuItem')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log("Нажатие на пункт меню 'Сотрудники'");
+
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            document.getElementById('users-section').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            e.target.classList.add('active');
+
+            console.log("Вызов loadUsers()");
+            loadUsers();
+        });
+
+        document.getElementById('createUserBtn')?.addEventListener('click', () => {
+            const modalElement = document.getElementById('userModal');
+            if (!modalElement) {
+                console.error('Элемент userModal не найден');
+                return;
+            }
+
+            const modal = bootstrap.Modal.getInstance(modalElement) ||
+                new bootstrap.Modal(modalElement);
+
+            // Сброс формы и открытие
+            document.getElementById('userForm').reset();
+            modal.show();
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Проверка, загрузился ли Bootstrap
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap JS не загружен!');
+                // Добавьте сообщение пользователю
+                showAlert('Ошибка загрузки интерфейса. Пожалуйста, обновите страницу.', 'danger');
+            } else {
+                console.log('Bootstrap успешно загружен');
+            }
+
+            // Остальной код инициализации
+            initializeApp();
+        });
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+
+            // Устанавливаем обработчики для модальных окон
+            const editModal = document.getElementById('editModal');
+            if (editModal) {
+                editModal.addEventListener('hidden.bs.modal', () => {
+                    // Сбрасываем форму при закрытии модального окна
+                    document.getElementById('editRequestForm')?.reset();
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>
