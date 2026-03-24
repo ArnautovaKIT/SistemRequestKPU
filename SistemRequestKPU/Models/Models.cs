@@ -14,6 +14,8 @@
 
     public class TechnologicalUnit
     {
+   
+
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty; // "Линия 25"
         public string Code { get; set; } = string.Empty; // "У25"
@@ -22,6 +24,9 @@
         public string Description { get; set; } = string.Empty; // Описание процесса
 
         public ICollection<EquipmentInstance> EquipmentInstances { get; set; } = new List<EquipmentInstance>();
+
+        public int? TechnicalObjectId { get; set; }
+        public TechnicalObject? TechnicalObject { get; set; }
     }
 
     public class Complex
@@ -44,6 +49,9 @@
         public DateTime? InstallationDate { get; set; } // Дата ввода в эксплуатацию
 
         public ICollection<EquipmentInstance> EquipmentInstances { get; set; } = new List<EquipmentInstance>();
+
+        public ICollection<TechnologicalUnit> TechnologicalUnits { get; set; } = new List<TechnologicalUnit>();
+        public bool IsGRS { get; internal set; }
     }
 
     public class EquipmentType

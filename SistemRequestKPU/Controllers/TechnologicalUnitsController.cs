@@ -7,7 +7,6 @@ namespace SistemRequestKPU.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class TechnologicalUnitsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -17,27 +16,48 @@ namespace SistemRequestKPU.Controllers
             _context = context;
         }
 
+        // GET: api/technologicalunits — все узлы
         [HttpGet]
-        [Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
         public async Task<IActionResult> GetAll()
         {
             var units = await _context.TechnologicalUnits
-                .Include(tu => tu.Workshop)
                 .Select(tu => new
                 {
                     tu.Id,
-                    Name = tu.Workshop.Name + " - " + tu.Name,
+                    tu.Name,
+                    tu.Code,
+                    tu.Description,
+                    WorkshopId = tu.WorkshopId,
+                    WorkshopName = tu.Workshop.Name,
+                    TechnicalObjectId = tu.TechnicalObjectId
+                })
+                .ToListAsync();
+
+            return Ok(units);
+        }
+
+        // GET: api/technologicalunits/byobject?technicalObjectId=5
+        [HttpGet("byobject")]
+        public async Task<IActionResult> GetByTechnicalObject([FromQuery] int technicalObjectId)
+        {
+            var units = await _context.TechnologicalUnits
+                .Where(tu => tu.TechnicalObjectId == technicalObjectId)
+                .Select(tu => new
+                {
+                    tu.Id,
+                    tu.Name,
                     tu.Code,
                     tu.Description,
                     WorkshopId = tu.WorkshopId,
                     WorkshopName = tu.Workshop.Name
                 })
                 .ToListAsync();
+
             return Ok(units);
         }
 
+        // GET: api/technologicalunits/by-workshop/{workshopId}
         [HttpGet("by-workshop/{workshopId}")]
-        [Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
         public async Task<IActionResult> GetByWorkshop(int workshopId)
         {
             var units = await _context.TechnologicalUnits
@@ -45,10 +65,13 @@ namespace SistemRequestKPU.Controllers
                 .Select(tu => new
                 {
                     tu.Id,
-                    Name = tu.Name + " (" + tu.Code + ")",
-                    tu.Code
+                    tu.Name,
+                    tu.Code,
+                    tu.Description,
+                    TechnicalObjectId = tu.TechnicalObjectId
                 })
                 .ToListAsync();
+
             return Ok(units);
         }
     }

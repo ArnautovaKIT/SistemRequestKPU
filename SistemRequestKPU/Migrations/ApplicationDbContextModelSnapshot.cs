@@ -44,22 +44,6 @@ namespace SistemRequestKPU.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Complexes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Location = "г. Москва, ул. Промышленная, д. 10",
-                            Name = "Газоперерабатывающий комплекс",
-                            Type = "ГПЗ"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Location = "г. Санкт-Петербург, пр. Энергетиков, д. 5",
-                            Name = "Нефтеперерабатывающий комплекс",
-                            Type = "НПЗ"
-                        });
                 });
 
             modelBuilder.Entity("EquipmentInstance", b =>
@@ -122,105 +106,38 @@ namespace SistemRequestKPU.Migrations
                         new
                         {
                             Id = 1,
-                            CurrentStatus = "В работе",
+                            CurrentStatus = "",
                             EquipmentTypeId = 1,
-                            FactoryNumber = "FAC-1001",
-                            InstallationDate = new DateTime(2020, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-001",
-                            LastMaintenanceDate = new DateTime(2023, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 7, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-001",
-                            TechnicalNumber = "TECH-001",
+                            FactoryNumber = "",
+                            InventoryNumber = "ГПА1.1-КУ-001",
+                            StationNumber = "",
+                            TechnicalNumber = "",
                             TechnicalObjectId = 1,
                             TechnologicalUnitId = 1
                         },
                         new
                         {
                             Id = 2,
-                            CurrentStatus = "В работе",
+                            CurrentStatus = "",
                             EquipmentTypeId = 2,
-                            FactoryNumber = "FAC-1002",
-                            InstallationDate = new DateTime(2020, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-002",
-                            LastMaintenanceDate = new DateTime(2023, 1, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 7, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-002",
-                            TechnicalNumber = "TECH-002",
+                            FactoryNumber = "",
+                            InventoryNumber = "ГПА1.1-АСУ-001",
+                            StationNumber = "",
+                            TechnicalNumber = "",
                             TechnicalObjectId = 1,
                             TechnologicalUnitId = 1
                         },
                         new
                         {
                             Id = 3,
-                            CurrentStatus = "Требует обслуживания",
+                            CurrentStatus = "",
                             EquipmentTypeId = 3,
-                            FactoryNumber = "FAC-1003",
-                            InstallationDate = new DateTime(2018, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-003",
-                            LastMaintenanceDate = new DateTime(2022, 12, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-003",
-                            TechnicalNumber = "TECH-003",
-                            TechnicalObjectId = 2,
-                            TechnologicalUnitId = 2
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CurrentStatus = "В работе",
-                            EquipmentTypeId = 4,
-                            FactoryNumber = "FAC-1004",
-                            InstallationDate = new DateTime(2019, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-004",
-                            LastMaintenanceDate = new DateTime(2023, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-004",
-                            TechnicalNumber = "TECH-004",
-                            TechnicalObjectId = 3
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CurrentStatus = "В работе",
-                            EquipmentTypeId = 5,
-                            FactoryNumber = "FAC-1005",
-                            InstallationDate = new DateTime(2021, 8, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-005",
-                            LastMaintenanceDate = new DateTime(2023, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-005",
-                            TechnicalNumber = "TECH-005",
-                            TechnicalObjectId = 4,
-                            TechnologicalUnitId = 5
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CurrentStatus = "В работе",
-                            EquipmentTypeId = 1,
-                            FactoryNumber = "FAC-1006",
-                            InstallationDate = new DateTime(2021, 8, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-006",
-                            LastMaintenanceDate = new DateTime(2023, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 9, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-006",
-                            TechnicalNumber = "TECH-006",
-                            TechnicalObjectId = 5,
-                            TechnologicalUnitId = 5
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CurrentStatus = "В работе",
-                            EquipmentTypeId = 3,
-                            FactoryNumber = "FAC-1007",
-                            InstallationDate = new DateTime(2019, 12, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InventoryNumber = "INV-007",
-                            LastMaintenanceDate = new DateTime(2023, 2, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NextMaintenanceDate = new DateTime(2023, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            StationNumber = "ST-007",
-                            TechnicalNumber = "TECH-007",
-                            TechnicalObjectId = 6
+                            FactoryNumber = "",
+                            InventoryNumber = "ГПА1.1-ДОД-001",
+                            StationNumber = "",
+                            TechnicalNumber = "",
+                            TechnicalObjectId = 1,
+                            TechnologicalUnitId = 1
                         });
                 });
 
@@ -265,80 +182,6 @@ namespace SistemRequestKPU.Migrations
                     b.HasIndex("EquipmentInstanceId");
 
                     b.ToTable("EquipmentParameters");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccuracyClass = "0.5",
-                            EquipmentInstanceId = 1,
-                            MaxValue = 100.0,
-                            MeasurementRange = "0-100 бар",
-                            MinValue = 0.0,
-                            NormalValue = 50.0,
-                            ParameterName = "Давление",
-                            Unit = "бар"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AccuracyClass = "1.0",
-                            EquipmentInstanceId = 1,
-                            MaxValue = 80.0,
-                            MeasurementRange = "-20°C до +80°C",
-                            MinValue = -20.0,
-                            NormalValue = 25.0,
-                            ParameterName = "Температура",
-                            Unit = "°C"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AccuracyClass = "1.0",
-                            EquipmentInstanceId = 2,
-                            MaxValue = 240.0,
-                            MeasurementRange = "220-240 В",
-                            MinValue = 220.0,
-                            NormalValue = 230.0,
-                            ParameterName = "Напряжение питания",
-                            Unit = "В"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            AccuracyClass = "1.0",
-                            EquipmentInstanceId = 2,
-                            MaxValue = 50.0,
-                            MeasurementRange = "0-50°C",
-                            MinValue = 0.0,
-                            NormalValue = 25.0,
-                            ParameterName = "Температура окружающей среды",
-                            Unit = "°C"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AccuracyClass = "0.5",
-                            EquipmentInstanceId = 3,
-                            MaxValue = 5000.0,
-                            MeasurementRange = "0-5000 м³/ч",
-                            MinValue = 0.0,
-                            NormalValue = 2500.0,
-                            ParameterName = "Расход газа",
-                            Unit = "м³/ч"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            AccuracyClass = "0.5",
-                            EquipmentInstanceId = 3,
-                            MaxValue = 100.0,
-                            MeasurementRange = "0-100 бар",
-                            MinValue = 0.0,
-                            NormalValue = 50.0,
-                            ParameterName = "Давление",
-                            Unit = "бар"
-                        });
                 });
 
             modelBuilder.Entity("EquipmentType", b =>
@@ -368,48 +211,6 @@ namespace SistemRequestKPU.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EquipmentTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Manufacturer = "Siemens",
-                            Model = "МП-100",
-                            Name = "Датчик давления",
-                            Specifications = "Диапазон 0-100 бар, класс точности 0.5"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Manufacturer = "ABB",
-                            Model = "AC800",
-                            Name = "Контроллер автоматики",
-                            Specifications = "Управление КИПиА, 16 каналов ввода-вывода"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Manufacturer = "Emerson",
-                            Model = "Rosemount 8600",
-                            Name = "Прибор измерения расхода",
-                            Specifications = "Контроль расхода газа, диапазон 0-5000 м³/ч"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Manufacturer = "Yokogawa",
-                            Model = "YT-500",
-                            Name = "Датчик температуры",
-                            Specifications = "Диапазон -50°C до +300°C, класс точности 0.2"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Manufacturer = "Festo",
-                            Model = "MPYE-5-1/8",
-                            Name = "Электромагнитный клапан",
-                            Specifications = "Управление потоком, давление до 10 бар"
-                        });
                 });
 
             modelBuilder.Entity("SistemRequestKPU.Models.RefreshToken", b =>
@@ -452,6 +253,9 @@ namespace SistemRequestKPU.Migrations
                     b.Property<DateTime?>("InstallationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsGRS")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -471,49 +275,17 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 1,
                             ComplexId = 1,
-                            InstallationDate = new DateTime(2020, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "ГРС-1",
-                            ObjectType = "Газораспределительная станция"
+                            IsGRS = false,
+                            Name = "Газокомпрессорная станция",
+                            ObjectType = "ГКС"
                         },
                         new
                         {
                             Id = 2,
-                            ComplexId = 1,
-                            InstallationDate = new DateTime(2018, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "КС-5",
-                            ObjectType = "Компрессорная станция"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ComplexId = 1,
-                            InstallationDate = new DateTime(2019, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Газопровод-10",
-                            ObjectType = "Газопровод"
-                        },
-                        new
-                        {
-                            Id = 4,
                             ComplexId = 2,
-                            InstallationDate = new DateTime(2021, 7, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Резервуар-1",
-                            ObjectType = "Резервуар"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ComplexId = 2,
-                            InstallationDate = new DateTime(2021, 7, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Резервуар-2",
-                            ObjectType = "Резервуар"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ComplexId = 2,
-                            InstallationDate = new DateTime(2019, 11, 22, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Насосная станция",
-                            ObjectType = "Насосная станция"
+                            IsGRS = true,
+                            Name = "Газораспределительная станция",
+                            ObjectType = "ГРС"
                         });
                 });
 
@@ -537,10 +309,15 @@ namespace SistemRequestKPU.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("TechnicalObjectId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("WorkshopId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TechnicalObjectId");
 
                     b.HasIndex("WorkshopId");
 
@@ -550,42 +327,83 @@ namespace SistemRequestKPU.Migrations
                         new
                         {
                             Id = 1,
-                            Code = "GRS-1",
-                            Description = "Основная газораспределительная станция комплекса",
-                            Name = "Газораспределительная станция",
+                            Code = "ГПА-1.1",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №1.1",
+                            TechnicalObjectId = 1,
                             WorkshopId = 1
                         },
                         new
                         {
                             Id = 2,
-                            Code = "KU-2",
-                            Description = "Компрессорная установка для повышения давления",
-                            Name = "Компрессорная установка",
+                            Code = "ГПА-1.2",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №1.2",
+                            TechnicalObjectId = 1,
                             WorkshopId = 1
                         },
                         new
                         {
                             Id = 3,
-                            Code = "SKD-3",
-                            Description = "Система контроля и регулирования давления газа",
-                            Name = "Система контроля давления",
+                            Code = "ГПА-2.1",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №2.1",
+                            TechnicalObjectId = 1,
                             WorkshopId = 2
                         },
                         new
                         {
                             Id = 4,
-                            Code = "SIM-4",
-                            Description = "Система измерения расхода газа на выходе",
-                            Name = "Система измерения расхода",
+                            Code = "ГПА-2.2",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №2.2",
+                            TechnicalObjectId = 1,
                             WorkshopId = 2
                         },
                         new
                         {
                             Id = 5,
-                            Code = "RP-5",
-                            Description = "Резервуары для хранения нефтепродуктов",
-                            Name = "Резервуарный парк",
+                            Code = "ГПА-3.1",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №3.1",
+                            TechnicalObjectId = 1,
                             WorkshopId = 3
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Code = "ГПА-3.2",
+                            Description = "",
+                            Name = "Газоперекачивающий агрегат №3.2",
+                            TechnicalObjectId = 1,
+                            WorkshopId = 3
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Code = "УОГ",
+                            Description = "",
+                            Name = "Узел очистки газа",
+                            TechnicalObjectId = 2,
+                            WorkshopId = 4
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Code = "УРГ",
+                            Description = "",
+                            Name = "Узел редуцирования газа",
+                            TechnicalObjectId = 2,
+                            WorkshopId = 4
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Code = "УПОГ",
+                            Description = "",
+                            Name = "Узел подогрева и одоризации газа",
+                            TechnicalObjectId = 2,
+                            WorkshopId = 4
                         });
                 });
 
@@ -618,23 +436,30 @@ namespace SistemRequestKPU.Migrations
                         new
                         {
                             Id = 1,
-                            Code = "CA-1",
-                            Name = "Цех автоматизации",
-                            ResponsiblePersonId = 2
+                            Code = "КЦ1",
+                            Name = "Компрессорный цех №1",
+                            ResponsiblePersonId = 1
                         },
                         new
                         {
                             Id = 2,
-                            Code = "KIP-2",
-                            Name = "Цех КИПиА",
-                            ResponsiblePersonId = 3
+                            Code = "КЦ2",
+                            Name = "Компрессорный цех №2",
+                            ResponsiblePersonId = 1
                         },
                         new
                         {
                             Id = 3,
-                            Code = "GP-3",
-                            Name = "Главный производственный цех",
-                            ResponsiblePersonId = 4
+                            Code = "КЦ3",
+                            Name = "Компрессорный цех №3",
+                            ResponsiblePersonId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "РЦ1",
+                            Name = "Распределительный цех №1",
+                            ResponsiblePersonId = 1
                         });
                 });
 
@@ -702,90 +527,6 @@ namespace SistemRequestKPU.Migrations
                     b.HasIndex("WorkshopId");
 
                     b.ToTable("Requests");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2025, 12, 8, 12, 50, 16, 530, DateTimeKind.Utc).AddTicks(232),
-                            CreatorId = 5,
-                            EquipmentInstanceId = 1,
-                            Priority = 2,
-                            Requirements = "Требуется замена датчика давления МП-100 на ГРС-1",
-                            Status = 0,
-                            TechnicalObjectId = 1,
-                            TechnicalSpecs = "Не работает датчик давления на ГРС-1. Необходима замена.",
-                            TechnologicalUnitId = 1,
-                            UniqueNumber = "REQ-001",
-                            WorkType = 2,
-                            WorkshopId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AssigneeId = 3,
-                            CreatedAt = new DateTime(2025, 12, 10, 12, 50, 16, 530, DateTimeKind.Utc).AddTicks(258),
-                            CreatorId = 5,
-                            EquipmentInstanceId = 2,
-                            Priority = 1,
-                            Requirements = "Настройка параметров контроллера и проверка работы системы",
-                            Status = 1,
-                            TechnicalObjectId = 1,
-                            TechnicalSpecs = "Необходима настройка контроллера автоматики AC800 на ГРС-1",
-                            TechnologicalUnitId = 1,
-                            UniqueNumber = "REQ-002",
-                            WorkType = 1,
-                            WorkshopId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            AssigneeId = 4,
-                            CreatedAt = new DateTime(2025, 12, 5, 12, 50, 16, 530, DateTimeKind.Utc).AddTicks(266),
-                            CreatorId = 5,
-                            EquipmentInstanceId = 4,
-                            Priority = 0,
-                            Requirements = "Монтаж и настройка датчика температуры YT-500",
-                            Status = 2,
-                            TechnicalObjectId = 3,
-                            TechnicalSpecs = "Установка нового датчика температуры на газопроводе-10",
-                            UniqueNumber = "REQ-003",
-                            WorkType = 0,
-                            WorkshopId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2025, 12, 12, 12, 50, 16, 530, DateTimeKind.Utc).AddTicks(273),
-                            CreatorId = 5,
-                            EquipmentInstanceId = 3,
-                            Priority = 3,
-                            Requirements = "Срочный ремонт узла компрессора, замена уплотнений",
-                            Status = 3,
-                            TechnicalObjectId = 2,
-                            TechnicalSpecs = "Аварийная утечка газа на компрессорной станции КС-5",
-                            TechnologicalUnitId = 2,
-                            UniqueNumber = "REQ-004",
-                            WorkType = 2,
-                            WorkshopId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            AssigneeId = 3,
-                            CreatedAt = new DateTime(2025, 12, 14, 12, 50, 16, 530, DateTimeKind.Utc).AddTicks(280),
-                            CreatorId = 5,
-                            EquipmentInstanceId = 5,
-                            Priority = 2,
-                            Requirements = "Калибровка прибора Rosemount 8600 и проверка показаний",
-                            Status = 1,
-                            TechnicalObjectId = 4,
-                            TechnicalSpecs = "Настройка системы измерения расхода на резервуаре-1",
-                            TechnologicalUnitId = 5,
-                            UniqueNumber = "REQ-005",
-                            WorkType = 1,
-                            WorkshopId = 3
-                        });
                 });
 
             modelBuilder.Entity("kursovou_wed.models.User", b =>
@@ -820,7 +561,7 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 1,
                             Email = "admin@example.com",
-                            PasswordHash = "$2a$11$IeiXvnAAV95dW0/zfVOhE.Txf.O1uL4vtDu/YjiyoLe/yHPz9sccG",
+                            PasswordHash = "$2a$11$woj0R5P2pi9VZdbeDO9ROezoiaaVSB8ZP2aKbEFgAouhByvgCXi1S",
                             Role = 3,
                             Username = "admin"
                         },
@@ -828,7 +569,7 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 2,
                             Email = "dispatcher@example.com",
-                            PasswordHash = "$2a$11$zCnqHpyaEj0vbRlrE.W4ie2DGIth0EfTfm4MFzf0P2j9alUYEKiV6",
+                            PasswordHash = "$2a$11$T/q7iRi4Cb.Zdf5.WZ23.uIS0pKC7Pnpg2Ch9ZJnkPPo4j89Zws9G",
                             Role = 2,
                             Username = "dispatcher"
                         },
@@ -836,7 +577,7 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 3,
                             Email = "executor1@example.com",
-                            PasswordHash = "$2a$11$IBopgt/.0k6e4XxgLyvvUOvaLM7VynKsd6aTiBayVxNZdfencfrzO",
+                            PasswordHash = "$2a$11$ka7hiJ520wOzTaOmmErT6.JWrQVHKPRlTZ7yyx/.Hzx6gsaSEqxWC",
                             Role = 1,
                             Username = "executor1"
                         },
@@ -844,7 +585,7 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 4,
                             Email = "executor2@example.com",
-                            PasswordHash = "$2a$11$rLIDauEecpiBhmoT4TSPaeGNO8uJc9nVjSNA1d90xfNNogT6U8rjS",
+                            PasswordHash = "$2a$11$8t3RMwBFgDrJLqpNxltqdejEnEAJoCOvn.4Skpw/H2vrx3xp.89ou",
                             Role = 1,
                             Username = "executor2"
                         },
@@ -852,7 +593,7 @@ namespace SistemRequestKPU.Migrations
                         {
                             Id = 5,
                             Email = "applicant@example.com",
-                            PasswordHash = "$2a$11$62UdAYk9yHx2yE9RBJu3luKnejBYU6QOTn01NVrqY8WuuyHHFLRJG",
+                            PasswordHash = "$2a$11$RUllYUgwYwSuz/jj/1/OxOUk92OnyCntohSRLxbDuG20bvBmrenwW",
                             Role = 0,
                             Username = "applicant"
                         });
@@ -908,11 +649,18 @@ namespace SistemRequestKPU.Migrations
 
             modelBuilder.Entity("TechnologicalUnit", b =>
                 {
+                    b.HasOne("TechnicalObject", "TechnicalObject")
+                        .WithMany("TechnologicalUnits")
+                        .HasForeignKey("TechnicalObjectId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Workshop", "Workshop")
                         .WithMany("TechnologicalUnits")
                         .HasForeignKey("WorkshopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("TechnicalObject");
 
                     b.Navigation("Workshop");
                 });
@@ -993,6 +741,8 @@ namespace SistemRequestKPU.Migrations
             modelBuilder.Entity("TechnicalObject", b =>
                 {
                     b.Navigation("EquipmentInstances");
+
+                    b.Navigation("TechnologicalUnits");
                 });
 
             modelBuilder.Entity("TechnologicalUnit", b =>

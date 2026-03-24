@@ -60,22 +60,38 @@ namespace SistemRequestKPU.Controllers
             return Ok(instances);
         }
 
-        [HttpGet("by-technological-unit/{technologicalUnitId}")]
-        [Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
-        public async Task<IActionResult> GetByTechnologicalUnit(int technologicalUnitId)
+        //[HttpGet("by-technological-unit/{technologicalUnitId}")]
+        //[Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
+        //public async Task<IActionResult> GetByTechnologicalUnit(int technologicalUnitId)
+        //{
+        //    var instances = await _context.EquipmentInstances
+        //        .Include(ei => ei.EquipmentType)
+        //        .Where(ei => ei.TechnologicalUnitId == technologicalUnitId)
+        //        .Select(ei => new
+        //        {
+        //            ei.Id,
+        //            Name = ei.EquipmentType.Name + " (" + (string.IsNullOrEmpty(ei.FactoryNumber) ? ei.InventoryNumber : ei.FactoryNumber) + ")",
+        //            ei.InventoryNumber,
+        //            ei.FactoryNumber
+        //        })
+        //        .ToListAsync();
+        //    return Ok(instances);
+        //}
+
+        [HttpGet("byunit")]
+        public async Task<IActionResult> GetByTechnologicalUnit([FromQuery] int technologicalUnitId)
         {
-            var instances = await _context.EquipmentInstances
-                .Include(ei => ei.EquipmentType)
-                .Where(ei => ei.TechnologicalUnitId == technologicalUnitId)
-                .Select(ei => new
+            var equipments = await _context.EquipmentInstances
+                .Where(e => e.TechnologicalUnitId == technologicalUnitId)
+                .Include(e => e.EquipmentType)
+                .Select(e => new
                 {
-                    ei.Id,
-                    Name = ei.EquipmentType.Name + " (" + (string.IsNullOrEmpty(ei.FactoryNumber) ? ei.InventoryNumber : ei.FactoryNumber) + ")",
-                    ei.InventoryNumber,
-                    ei.FactoryNumber
+                    e.Id,
+                    Name = e.EquipmentType.Name + " (" + e.InventoryNumber + ")"
                 })
                 .ToListAsync();
-            return Ok(instances);
+
+            return Ok(equipments);
         }
     }
 }
