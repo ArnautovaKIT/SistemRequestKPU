@@ -19,9 +19,17 @@ namespace SistemRequestKPU.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int? technicalObjectId)
         {
-            var workshops = await _context.Workshops
+            var workshopsQuery = _context.Workshops.AsQueryable();
+
+            if (technicalObjectId.HasValue)
+            {
+                workshopsQuery = workshopsQuery
+                    .Where(w => w.TechnologicalUnits.Any(tu => tu.TechnicalObjectId == technicalObjectId.Value));
+            }
+
+            var workshops = await workshopsQuery
                 .Select(w => new
                 {
                     w.Id,
@@ -32,6 +40,13 @@ namespace SistemRequestKPU.Controllers
                 })
                 .ToListAsync();
             return Ok(workshops);
+        }
+
+        [HttpGet("by-object/{technicalObjectId}")]
+        [Authorize(Roles = "Applicant,Dispatcher,Executor,Admin")]
+        public async Task<IActionResult> GetByTechnicalObject(int technicalObjectId)
+        {
+            return await GetAll(technicalObjectId);
         }
 
         [HttpGet("{id}")]

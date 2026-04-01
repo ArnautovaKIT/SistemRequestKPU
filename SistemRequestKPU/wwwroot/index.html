@@ -257,6 +257,26 @@
                                         </select>
                                     </div>
 
+                                    <!-- Приоритет и Тип работ -->
+                                    <div class="col-md-6">
+                                        <label class="form-label">Приоритет *</label>
+                                        <select class="form-select" id="priority" required>
+                                            <option value="Low">Низкий</option>
+                                            <option value="Medium">Средний</option>
+                                            <option value="High">Высокий</option>
+                                            <option value="Critical">Критический</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Тип работ *</label>
+                                        <select class="form-select" id="workType" required>
+                                            <option value="Installation">Установка</option>
+                                            <option value="Setup">Наладка</option>
+                                            <option value="Repair">Ремонт</option>
+                                        </select>
+                                    </div>
+
                                     <!-- 5. Комментарий / Описание -->
                                     <div class="col-12">
                                         <label class="form-label">Описание заявки</label>
@@ -353,6 +373,29 @@
                         </div>
                     </div>
                 </div>
+                <div class="modal fade" id="adminApprovalModal" tabindex="-1" aria-hidden="true" aria-labelledby="adminApprovalModalTitle">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="adminApprovalModalTitle">Подтверждение администратора</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-2">На согласующую почту отправлен код подтверждения.</p>
+                                <input type="text" class="form-control" id="adminApprovalCodeInput" maxlength="6" placeholder="Введите 6-значный код">
+                                <div class="text-danger small mt-2" id="adminApprovalCodeError" style="display:none;"></div>
+                            </div>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="resendAdminCodeBtn">Отправить код повторно</button>
+                                <div>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                    <button type="button" class="btn btn-primary" id="confirmAdminCodeBtn">Подтвердить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -500,6 +543,7 @@
         let currentEditRequest = null; // Исправлено: добавлена глобальная переменная
         let currentUsers = []; // Добавляем массив для пользователей
         let currentEditUser = null; // Добавляем переменную для редактируемого пользователя
+        let pendingAdminUserData = null;
 
         const api = {
             baseUrl: '/api',
@@ -523,7 +567,16 @@
                         const errorText = await response.text();
                         throw new Error(`HTTP ${response.status}: ${errorText}`);
                     }
-                    return await response.json();
+                    if (response.status === 204) {
+                        return null;
+                    }
+
+                    const responseText = await response.text();
+                    if (!responseText) {
+                        return null;
+                    }
+
+                    return JSON.parse(responseText);
                 } catch (error) {
                     console.error(`API Error [${endpoint}]:`, error);
                     throw error;
@@ -536,6 +589,7 @@
             assignExecutor: (id, aid) => api.request(`/requests/${id}/assign`, { method: 'PUT', body: JSON.stringify({ assigneeId: aid }) }),
             deleteRequest: (id) => api.request(`/requests/${id}`, { method: 'DELETE' }),
             getWorkshops: () => api.request('/workshops'),
+            getWorkshopsByTechnicalObject: (technicalObjectId) => api.request(`/workshops/by-object/${technicalObjectId}`),
             getTechnologicalUnits: () => api.request('/technologicalunits'),
             getTechnologicalUnitsByWorkshop: (workshopId) => api.request(`/technologicalunits/by-workshop/${workshopId}`),
             getEquipmentInstances: () => api.request('/equipmentinstances'),
@@ -544,6 +598,7 @@
             getUsers: () => api.request('/users'),
             getUser: (id) => api.request(`/users/${id}`),
             createUser: (data) => api.request('/users', { method: 'POST', body: JSON.stringify(data) }),
+            requestAdminRegistrationCode: (data) => api.request('/users/admin-registration-code', { method: 'POST', body: JSON.stringify(data) }),
             updateUser: (id, data) => api.request(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
             deleteUser: (id) => api.request(`/users/${id}`, { method: 'DELETE' })
         };
@@ -921,6 +976,28 @@
                     await api.updateUser(userId, data);
                     showAlert('Сотрудник успешно обновлен!', 'success');
                 } else {
+                    if (role === 'Admin') {
+                        pendingAdminUserData = { ...data };
+                        await api.requestAdminRegistrationCode({ username, email });
+
+                        const codeInput = document.getElementById('adminApprovalCodeInput');
+                        const codeError = document.getElementById('adminApprovalCodeError');
+                        if (codeInput) codeInput.value = '';
+                        if (codeError) {
+                            codeError.style.display = 'none';
+                            codeError.textContent = '';
+                        }
+                        const userModalElement = document.getElementById('userModal');
+                        const userModalInstance = bootstrap.Modal.getInstance(userModalElement);
+                        userModalInstance?.hide();
+
+                        const adminModalElement = document.getElementById('adminApprovalModal');
+                        setTimeout(() => {
+                            new bootstrap.Modal(adminModalElement).show();
+                        }, 180);
+                        return;
+                    }
+
                     await api.createUser(data);
                     showAlert('Сотрудник успешно добавлен!', 'success');
                 }
@@ -951,6 +1028,79 @@
                 }
                 console.error('User save error:', error);
             }
+        });
+
+        document.getElementById('resendAdminCodeBtn')?.addEventListener('click', async () => {
+            if (!pendingAdminUserData) {
+                showErrorAlert('Нет данных для повторной отправки кода');
+                return;
+            }
+
+            try {
+                await api.requestAdminRegistrationCode({
+                    username: pendingAdminUserData.username,
+                    email: pendingAdminUserData.email
+                });
+                showAlert('Код подтверждения отправлен повторно', 'success');
+            } catch (error) {
+                showErrorAlert(error.message || 'Не удалось отправить код повторно');
+            }
+        });
+
+        document.getElementById('confirmAdminCodeBtn')?.addEventListener('click', async () => {
+            const codeInput = document.getElementById('adminApprovalCodeInput');
+            const codeError = document.getElementById('adminApprovalCodeError');
+            const code = codeInput?.value?.trim() || '';
+
+            if (codeError) {
+                codeError.style.display = 'none';
+                codeError.textContent = '';
+            }
+
+            if (!pendingAdminUserData) {
+                showErrorAlert('Нет данных для подтверждения регистрации');
+                return;
+            }
+
+            if (!/^\d{6}$/.test(code)) {
+                if (codeError) {
+                    codeError.textContent = 'Введите корректный 6-значный код';
+                    codeError.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                await api.createUser({
+                    ...pendingAdminUserData,
+                    adminApprovalCode: code
+                });
+
+                showAlert('Администратор успешно добавлен!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('adminApprovalModal'))?.hide();
+                bootstrap.Modal.getInstance(document.getElementById('userModal'))?.hide();
+                document.getElementById('userForm')?.reset();
+                pendingAdminUserData = null;
+                await loadUsers();
+            } catch (error) {
+                if (codeError) {
+                    codeError.textContent = error.message || 'Не удалось подтвердить код';
+                    codeError.style.display = 'block';
+                } else {
+                    showErrorAlert(error.message || 'Не удалось подтвердить код');
+                }
+            }
+        });
+
+        document.getElementById('adminApprovalModal')?.addEventListener('hidden.bs.modal', () => {
+            const codeInput = document.getElementById('adminApprovalCodeInput');
+            const codeError = document.getElementById('adminApprovalCodeError');
+            if (codeInput) codeInput.value = '';
+            if (codeError) {
+                codeError.style.display = 'none';
+                codeError.textContent = '';
+            }
+            pendingAdminUserData = null;
         });
 
         // Удаление пользователя
@@ -1016,8 +1166,8 @@
                 const data = {
                     workType: document.getElementById('workType').value,
                     priority: document.getElementById('priority').value,
-                    problemDescription: document.getElementById('problemDescription').value,
-                    additionalComments: document.getElementById('additionalComments').value || null,
+                    problemDescription: document.getElementById('description').value,
+                    additionalComments: document.getElementById('technicalExplanation').value || null,
                     equipmentInstanceId: +document.getElementById('equipmentInstance').value,
                     technicalObjectId: +document.getElementById('technicalObject').value,
                     workshopId: +document.getElementById('workshop').value,
@@ -1560,8 +1710,8 @@
                 });
                 equipmentSelect.disabled = false;
 
-                // Загружаем все цеха для выбора
-                const workshops = await api.getWorkshops();
+                // Загружаем только цеха, связанные с выбранным объектом
+                const workshops = await api.getWorkshopsByTechnicalObject(objectId);
                 workshopSelect.innerHTML = '<option value="">Выберите цех</option>';
                 workshops.forEach(ws => {
                     const option = document.createElement('option');
@@ -1612,66 +1762,7 @@
             }
         });
 
-        // Обработка отправки формы создания заявки
-        document.getElementById('createRequestForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = {
-                workType: document.getElementById('workType').value,
-                priority: document.getElementById('priority').value,
-                technicalObjectId: parseInt(document.getElementById('technicalObject').value),
-                workshopId: parseInt(document.getElementById('workshop').value),
-                technologicalUnitId: document.getElementById('technologicalUnit').value ?
-                    parseInt(document.getElementById('technologicalUnit').value) : null,
-                equipmentInstanceId: parseInt(document.getElementById('equipmentInstance').value),
-                problemDescription: document.getElementById('problemDescription').value,
-                technicalSpecifications: document.getElementById('technicalSpecifications').value,
-            };
-
-            // Валидация на стороне клиента
-            if (!formData.workType || !formData.priority || !formData.problemDescription) {
-                showErrorAlert('Заполните все обязательные поля (отмечены *)');
-                return;
-            }
-
-            try {
-                // Преобразуем данные в формат API
-                const requestData = {
-                    workType: formData.workType,
-                    priority: formData.priority,
-                    status: 'New',
-                    technicalSpecs: formData.technicalSpecifications,
-                    requirements: formData.problemDescription,
-                    equipmentInstanceId: formData.equipmentInstanceId,
-                    technicalObjectId: formData.technicalObjectId,
-                    workshopId: formData.workshopId,
-                    technologicalUnitId: formData.technologicalUnitId
-                };
-
-                await api.createRequest(requestData);
-                showAlert('Заявка успешно создана!', 'success');
-
-                // Сбрасываем форму
-                document.getElementById('createRequestForm').reset();
-                document.getElementById('technologicalUnit').disabled = true;
-                document.getElementById('workshop').disabled = true;
-                document.getElementById('equipmentInstance').disabled = true;
-
-                // Загружаем обновленный список заявок
-                await loadDashboard();
-
-                // Переходим на страницу всех заявок
-                document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
-                document.getElementById('requests-section').style.display = 'block';
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                document.querySelector('[data-section="requests"]').classList.add('active');
-
-            } catch (error) {
-                showErrorAlert(error.message || 'Не удалось создать заявку');
-                console.error('Create request error:', error);
-            }
-        });
-
+        
         // Инициализируем форму при загрузке приложения
         document.addEventListener('DOMContentLoaded', () => {
             initializeCreateRequestForm();

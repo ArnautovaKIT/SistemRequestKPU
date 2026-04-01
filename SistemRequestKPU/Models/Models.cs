@@ -75,7 +75,8 @@
         public string StationNumber { get; set; } = string.Empty; // Станционный номер
         public string TechnicalNumber { get; set; } = string.Empty; // Технологический номер
         public DateTime? InstallationDate { get; set; } // Дата установки
-        public int TechnicalObjectId { get; set; } // FK на TechnicalObject
+
+        public int? TechnicalObjectId { get; set; } // FK на TechnicalObject
         public TechnicalObject TechnicalObject { get; set; } = null!;
         public int? TechnologicalUnitId { get; set; } // FK на TechnologicalUnit (optional)
         public TechnologicalUnit? TechnologicalUnit { get; set; }

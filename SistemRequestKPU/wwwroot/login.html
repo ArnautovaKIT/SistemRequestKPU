@@ -21,6 +21,7 @@
         <form id="register-form">
             <input type="text" id="reg-username" placeholder="Имя пользователя" required>
             <input type="password" id="reg-password" placeholder="Пароль" required>
+            <input type="email" id="reg-email" placeholder="Email" required>
             <select id="reg-role" required>
                 <option value="" disabled selected>Выберите роль</option>
                 <option value="0">Заявитель (Applicant)</option>
@@ -113,13 +114,39 @@
 
             const username = document.getElementById('reg-username').value;
             const password = document.getElementById('reg-password').value;
+            const email = document.getElementById('reg-email').value;
             const roleId = document.getElementById('reg-role').value;
 
             try {
+                let adminApprovalCode = null;
+                if (parseInt(roleId) === 3) {
+                    const sendCodeResponse = await fetch(`${API_URL}/Account/SendAdminCode`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, email, roleId: parseInt(roleId) })
+                    });
+
+                    if (!sendCodeResponse.ok) {
+                        const errorData = await sendCodeResponse.json();
+                        throw new Error(errorData.message || 'Не удалось отправить код подтверждения');
+                    }
+
+                    adminApprovalCode = prompt('На указанную почту отправлен код подтверждения. Введите код:');
+                    if (!adminApprovalCode || !adminApprovalCode.trim()) {
+                        throw new Error('Код подтверждения не введён');
+                    }
+                }
+
                 const response = await fetch(`${API_URL}/Account/Register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, roleId: parseInt(roleId) })
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        email,
+                        roleId: parseInt(roleId),
+                        adminApprovalCode: adminApprovalCode ? adminApprovalCode.trim() : null
+                    })
                 });
 
                 if (!response.ok) {

@@ -36,7 +36,18 @@ namespace SistemRequestKPU.Controllers
             return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
         }
 
-       
+        [HttpPost("SendAdminCode")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendAdminCode([FromBody] UserRegisterDTO registerDto)
+        {
+            var result = await _authService.SendAdminRegistrationCode(registerDto);
+            if (!result.Success)
+                return BadRequest(new { message = result.ErrorMessage });
+
+            return Ok(new { message = "Код подтверждения отправлен на указанную почту." });
+        }
+
+
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDTO registerDto)
         {
