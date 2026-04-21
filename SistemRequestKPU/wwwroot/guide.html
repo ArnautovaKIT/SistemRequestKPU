@@ -1,0 +1,420 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Руководство: [Название темы]</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        /* Шапка */
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .badge {
+            background: #e2e8f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+
+        /* Основной контейнер */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        /* Боковое оглавление */
+        .sidebar {
+            flex: 0 0 280px;
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+        }
+
+            .sidebar h3 {
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #475569;
+                margin-bottom: 1rem;
+            }
+
+        .toc {
+            list-style: none;
+        }
+
+            .toc li {
+                margin-bottom: 0.75rem;
+            }
+
+            .toc a {
+                text-decoration: none;
+                color: #334155;
+                font-size: 0.95rem;
+                transition: color 0.2s;
+                display: block;
+                padding: 0.25rem 0;
+            }
+
+                .toc a:hover {
+                    color: #2563eb;
+                }
+
+        /* Основной контент */
+        .content {
+            flex: 1;
+            min-width: 0; /* предотвращает переполнение */
+        }
+
+        /* Карточки шагов / разделов */
+        .step-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 2.5rem;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+            .step-card:hover {
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+            }
+
+        .step-header {
+            padding: 1.5rem 2rem 0.5rem 2rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .step-number {
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: #334155;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        /* Блок скриншот + описание (гибкая сетка) */
+        .screenshot-block {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 1.5rem 2rem 2rem 2rem;
+            align-items: flex-start;
+        }
+
+        .screenshot {
+            flex: 1.2;
+            min-width: 250px;
+        }
+
+            .screenshot img {
+                width: 100%;
+                height: auto;
+                border-radius: 1rem;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                transition: transform 0.2s;
+                background: #f1f5f9;
+            }
+
+                .screenshot img:hover {
+                    transform: scale(1.01);
+                }
+
+        .caption {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 0.5rem;
+        }
+
+        .description {
+            flex: 1;
+            min-width: 240px;
+        }
+
+            .description p {
+                margin-bottom: 1rem;
+            }
+
+            .description ul, .description ol {
+                margin-left: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+
+        /* Доп. блок примечания */
+        .note {
+            background: #fef9c3;
+            border-left: 4px solid #eab308;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: none;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Адаптив */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+            }
+
+            .screenshot-block {
+                flex-direction: column;
+            }
+
+            .step-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 2rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-title">📘 Руководство пользователя</div>
+            <div class="badge">Версия 1.0 • Актуально на апрель 2026</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Боковое оглавление (автоматически ссылается на id разделов) -->
+        <aside class="sidebar">
+            <h3>Содержание</h3>
+            <ul class="toc">
+                <li><a href="#step1">1. Подготовка к работе</a></li>
+                <li><a href="#step2">2. Настройка окружения</a></li>
+                <li><a href="#step3">3. Основные действия</a></li>
+                <li><a href="#step4">4. Результат и примеры</a></li>
+                <li><a href="#faq">Частые вопросы</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <!-- Шаг 1 -->
+            <section id="step1" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Шаг 1</span>
+                    <h2 class="step-title">Подготовка к работе</h2>
+                    <div class="step-description">
+                        Убедитесь, что ваша система соответствует минимальным требованиям.
+                    </div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <!-- Замените src на реальный путь к скриншоту -->
+                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+1:+Главное+окно" alt="Скриншот главного окна">
+                        <div class="caption">Рис. 1 — Интерфейс перед началом работы</div>
+                    </div>
+                    <div class="description">
+                        <p>Перед запуском <strong>скачайте последнюю версию приложения</strong> с официального сайта. Установите программу, следуя инструкциям мастера установки.</p>
+                        <ul>
+                            <li>ОС: Windows 10 / macOS 12+ / Linux (Ubuntu 22.04)</li>
+                            <li>RAM: от 4 ГБ</li>
+                            <li>Свободное место: 500 МБ</li>
+                        </ul>
+                        <div class="note">💡 Совет: отключите антивирус на время установки, если возникают ложные срабатывания.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Шаг 2 -->
+            <section id="step2" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Шаг 2</span>
+                    <h2 class="step-title">Настройка окружения</h2>
+                    <div class="step-description">
+                        Импорт конфигурации и проверка подключений.
+                    </div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+2:+Настройки" alt="Окно настроек">
+                        <div class="caption">Рис. 2 — Страница настроек профиля</div>
+                    </div>
+                    <div class="description">
+                        <p>Откройте меню «Файл» → «Настройки». Во вкладке «Общие» укажите путь к рабочей папке. Затем перейдите в раздел «API / Подключения» и введите ключ доступа (выдан администратором).</p>
+                        <div class="code-block">
+                            API_KEY = "ваш_ключ_здесь"<br>
+                            BASE_URL = "https://api.example.com/v1"
+                        </div>
+                        <p>Нажмите «Проверить соединение». При успехе появится зелёный индикатор.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Шаг 3: пример с двумя скриншотами в одном блоке (можно карусель или два изображения) -->
+            <section id="step3" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Шаг 3</span>
+                    <h2 class="step-title">Основные действия</h2>
+                    <div class="step-description">
+                        Загрузка данных и визуализация.
+                    </div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+3a:+Загрузка" alt="Кнопка загрузки">
+                        <div class="caption">Рис. 3a — Кнопка импорта</div>
+                    </div>
+                    <div class="screenshot">
+                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+3b:+Результат" alt="Результат обработки">
+                        <div class="caption">Рис. 3b — Визуализация отчёта</div>
+                    </div>
+                    <div class="description">
+                        <p>Нажмите <strong>«Загрузить файл»</strong> (поддерживаются CSV, JSON, XLSX). После успешной загрузки система отобразит предпросмотр. Для построения графика выберите нужные колонки и нажмите «Анализ».</p>
+                        <div class="warning">⚠️ Внимание: максимальный размер файла — 50 МБ. Для больших объёмов используйте пакетный режим.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Шаг 4 -->
+            <section id="step4" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Шаг 4</span>
+                    <h2 class="step-title">Результат и примеры</h2>
+                    <div class="step-description">
+                        Экспорт отчётов и сохранение настроек.
+                    </div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+4:+Экспорт" alt="Экспорт отчёта">
+                        <div class="caption">Рис. 4 — Диалог экспорта</div>
+                    </div>
+                    <div class="description">
+                        <p>Готовый отчёт можно сохранить в PDF, Excel или CSV. Нажмите «Экспорт», выберите формат и место сохранения. Также вы можете <strong>сохранить текущий рабочий профиль</strong> для повторного использования.</p>
+                        <p><strong>Пример экспортированного отчёта:</strong></p>
+                        <div class="code-block">
+                            | Дата       | Показатель | Значение |<br>
+                            | 2026-04-01 | Доход      | 12500    |<br>
+                            | 2026-04-02 | Доход      | 13200    |
+                        </div>
+                        <p>После завершения не забудьте выйти из аккаунта через меню «Профиль» → «Выйти».</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Блок FAQ / Частые вопросы -->
+            <section id="faq" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">❓ FAQ</span>
+                    <h2 class="step-title">Частые вопросы и устранение неполадок</h2>
+                </div>
+                <div style="padding: 1.5rem 2rem 2rem 2rem;">
+                    <p><strong>Вопрос:</strong> При загрузке файла возникает ошибка «Неверный формат»?</p>
+                    <p><strong>Ответ:</strong> Убедитесь, что файл соответствует UTF-8 кодировке и не содержит битых символов. Попробуйте пересохранить файл в Блокноте как UTF-8.</p>
+                    <hr>
+                    <p><strong>Вопрос:</strong> Где хранятся сохранённые профили?</p>
+                    <p><strong>Ответ:</strong> По умолчанию в папке `%APPDATA%\YourApp\profiles` (Windows) или `~/Library/Application Support/YourApp` (macOS).</p>
+                    <hr>
+                    <p><strong>Вопрос:</strong> Скриншоты не отображаются, что делать?</p>
+                    <p><strong>Ответ:</strong> Замените ссылки-заглушки `https://placehold.co/...` на реальные пути к вашим изображениям. Рекомендуется хранить скриншоты в папке `images/` относительно HTML-файла.</p>
+                    <div class="note">📌 Если у вас остались вопросы, обратитесь в техподдержку: support@example.com</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        © 2026 Руководство пользователя. Все права защищены. Данные скриншоты являются иллюстративными.
+    </footer>
+</body>
+</html>
