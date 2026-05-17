@@ -144,6 +144,20 @@
                 padding: 0.5rem 0.75rem;
             }
 
+
+        #about-section .card {
+            border: none;
+            border-radius: 16px;
+        }
+
+        #about-section h4 {
+            font-weight: 600;
+        }
+
+        #about-section .list-group-item {
+            border: none;
+            padding-left: 0;
+        }
         
     </style>
 </head>
@@ -169,6 +183,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="guide.html">
                             <i class="bi bi-book"></i> Руководство
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="about">
+                            <i class="bi bi-info-circle"></i> О приложении
                         </a>
                     </li>
                 </ul>
@@ -397,6 +416,96 @@
                                     <button type="button" class="btn btn-primary" id="confirmAdminCodeBtn">Подтвердить</button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- О приложении -->
+                <div id="about-section" class="content-section" style="display:none;">
+                    <h1 class="h2 my-4">О приложении</h1>
+
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+
+                            <div class="mb-4">
+                                <h4 class="mb-3">
+                                    <i class="bi bi-pc-display text-primary"></i>
+                                    Назначение системы
+                                </h4>
+
+                                <p>
+                                    Данное веб-приложение предназначено для автоматизации
+                                    процесса обработки заявок на техническое обслуживание,
+                                    ремонт, наладку и установку промышленного оборудования.
+                                </p>
+
+                                <p>
+                                    Система позволяет сотрудникам предприятия создавать заявки,
+                                    назначать исполнителей, отслеживать статусы выполнения,
+                                    управлять персоналом и вести централизованный учет работ.
+                                </p>
+
+                                <p>
+                                    Приложение ориентировано на использование в производственных
+                                    и промышленных организациях для повышения эффективности
+                                    технического обслуживания оборудования.
+                                </p>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-4">
+                                <h4 class="mb-3">
+                                    <i class="bi bi-gear text-success"></i>
+                                    Основные возможности
+                                </h4>
+
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        Создание и редактирование заявок
+                                    </li>
+                                    <li class="list-group-item">
+                                        Назначение исполнителей
+                                    </li>
+                                    <li class="list-group-item">
+                                        Контроль статусов выполнения работ
+                                    </li>
+                                    <li class="list-group-item">
+                                        Управление сотрудниками и ролями
+                                    </li>
+                                    <li class="list-group-item">
+                                        Централизованный учет оборудования
+                                    </li>
+                                    <li class="list-group-item">
+                                        Просмотр статистики и панели мониторинга
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <hr>
+
+                            <div>
+                                <h4 class="mb-3">
+                                    <i class="bi bi-person-badge text-warning"></i>
+                                    Информация о разработчике
+                                </h4>
+
+                                <p class="mb-1">
+                                    <strong>Разработчик:</strong> Арнаутова Екатерина
+                                </p>
+
+                                <p class="mb-1">
+                                    <strong>Технологии:</strong>
+                                    ASP.NET Core Web API, Entity Framework Core,
+                                    HTML, CSS, JavaScript, Bootstrap
+                                </p>
+
+                                <p class="mb-0">
+                                    <strong>Назначение проекта:</strong>
+                                    система управления заявками технического обслуживания оборудования.
+                                </p>
+                            </div>
+
                         </div>
                     </div>
                 </div>
