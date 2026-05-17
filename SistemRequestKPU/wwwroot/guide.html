@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Руководство: [Название темы]</title>
+    <title>Руководство: Система управления заявками</title>
     <style>
         * {
             margin: 0;
@@ -18,7 +19,6 @@
             line-height: 1.5;
         }
 
-        /* Шапка */
         .header {
             background: #ffffff;
             border-bottom: 1px solid #e2e8f0;
@@ -58,7 +58,6 @@
             color: #1e293b;
         }
 
-        /* Основной контейнер */
         .container {
             max-width: 1400px;
             margin: 2rem auto;
@@ -67,7 +66,6 @@
             gap: 2rem;
         }
 
-        /* Боковое оглавление */
         .sidebar {
             flex: 0 0 280px;
             position: sticky;
@@ -108,13 +106,11 @@
                     color: #2563eb;
                 }
 
-        /* Основной контент */
         .content {
             flex: 1;
-            min-width: 0; /* предотвращает переполнение */
+            min-width: 0;
         }
 
-        /* Карточки шагов / разделов */
         .step-card {
             background: #ffffff;
             border-radius: 1.5rem;
@@ -156,7 +152,6 @@
             font-size: 1rem;
         }
 
-        /* Блок скриншот + описание (гибкая сетка) */
         .screenshot-block {
             display: flex;
             flex-wrap: wrap;
@@ -205,18 +200,6 @@
                 margin-bottom: 1rem;
             }
 
-        .code-block {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            font-family: 'Fira Code', 'Cascadia Code', monospace;
-            font-size: 0.85rem;
-            margin: 1rem 0;
-        }
-
-        /* Доп. блок примечания */
         .note {
             background: #fef9c3;
             border-left: 4px solid #eab308;
@@ -230,13 +213,20 @@
             border-left: 4px solid #ef4444;
         }
 
+        .info {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+        }
+
         hr {
             margin: 1rem 0;
             border: none;
             border-top: 1px solid #e2e8f0;
         }
 
-        /* Адаптив */
         @media (max-width: 900px) {
             .container {
                 flex-direction: column;
@@ -264,157 +254,297 @@
             color: #64748b;
             font-size: 0.85rem;
         }
+
+        .two-screens {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: space-between;
+        }
+
+            .two-screens .screenshot {
+                flex: 1;
+                min-width: 200px;
+            }
+
+        .back {
+            display: inline-block;
+            padding: 10px;
+            border-radius: 40px;
+            color: black;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="header-container">
-            <div class="logo-title">📘 Руководство пользователя</div>
-            <div class="badge">Версия 1.0 • Актуально на апрель 2026</div>
+            <div class="logo-title">📋 Система управления заявками</div>
+            <div class="badge">Руководство пользователя • Версия 2.0</div>
         </div>
     </header>
 
+    
+    <button id="nazad" onclick="history.back()" class="back">Назад</button>
+    
+
     <div class="container">
-        <!-- Боковое оглавление (автоматически ссылается на id разделов) -->
         <aside class="sidebar">
             <h3>Содержание</h3>
             <ul class="toc">
-                <li><a href="#step1">1. Подготовка к работе</a></li>
-                <li><a href="#step2">2. Настройка окружения</a></li>
-                <li><a href="#step3">3. Основные действия</a></li>
-                <li><a href="#step4">4. Результат и примеры</a></li>
+                <li><a href="#auth">1. Авторизация и регистрация</a></li>
+                <li><a href="#registration">2. Регистрация нового пользователя</a></li>
+                <li><a href="#admin-reg">3. Особый вход: регистрация администратора</a></li>
+                <li><a href="#dashboard">4. Панель управления администратора</a></li>
+                <li><a href="#delete-request">5. Удаление заявки (процедура)</a></li>
+                <li><a href="#all-requests">6. История заявок / реестр</a></li>
+                <li><a href="#new-request">7. Создание новой заявки</a></li>
+                <li><a href="#email-notify">8. Почтовые уведомления</a></li>
                 <li><a href="#faq">Частые вопросы</a></li>
             </ul>
         </aside>
 
         <main class="content">
-            <!-- Шаг 1 -->
-            <section id="step1" class="step-card">
+            <!-- 1. АВТОРИЗАЦИЯ -->
+            <section id="auth" class="step-card">
                 <div class="step-header">
-                    <span class="step-number">Шаг 1</span>
-                    <h2 class="step-title">Подготовка к работе</h2>
-                    <div class="step-description">
-                        Убедитесь, что ваша система соответствует минимальным требованиям.
-                    </div>
+                    <span class="step-number">Этап 1</span>
+                    <h2 class="step-title">Авторизация в системе</h2>
+                    <div class="step-description">Вход для зарегистрированных пользователей.</div>
                 </div>
                 <div class="screenshot-block">
                     <div class="screenshot">
-                        <!-- Замените src на реальный путь к скриншоту -->
-                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+1:+Главное+окно" alt="Скриншот главного окна">
-                        <div class="caption">Рис. 1 — Интерфейс перед началом работы</div>
+                        <img src="media/media1.png" alt="Страница авторизации" onerror="this.src='https://placehold.co/600x450/e2e8f0/334155?text=Страница+Авторизация'">
+                        <div class="caption">Рисунок 2.13 — Страница «Авторизация»</div>
                     </div>
                     <div class="description">
-                        <p>Перед запуском <strong>скачайте последнюю версию приложения</strong> с официального сайта. Установите программу, следуя инструкциям мастера установки.</p>
+                        <p>При запуске приложения открывается <strong>экран авторизации</strong>. Для входа требуется:</p>
                         <ul>
-                            <li>ОС: Windows 10 / macOS 12+ / Linux (Ubuntu 22.04)</li>
-                            <li>RAM: от 4 ГБ</li>
-                            <li>Свободное место: 500 МБ</li>
+                            <li>Ввести имя пользователя</li>
+                            <li>Ввести пароль</li>
+                            <li>Нажать кнопку <strong>«Войти»</strong></li>
                         </ul>
-                        <div class="note">💡 Совет: отключите антивирус на время установки, если возникают ложные срабатывания.</div>
+                        <p>Если учётной записи ещё нет — нажмите «Зарегистрироваться» для перехода к форме регистрации.</p>
+                        <div class="note">✅ Успешная авторизация подтверждается системным уведомлением (см. Рисунок 2.15).</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Шаг 2 -->
-            <section id="step2" class="step-card">
+            <!-- 2. РЕГИСТРАЦИЯ -->
+            <section id="registration" class="step-card">
                 <div class="step-header">
-                    <span class="step-number">Шаг 2</span>
-                    <h2 class="step-title">Настройка окружения</h2>
-                    <div class="step-description">
-                        Импорт конфигурации и проверка подключений.
-                    </div>
+                    <span class="step-number">Этап 2</span>
+                    <h2 class="step-title">Регистрация нового пользователя</h2>
+                    <div class="step-description">Создание учётной записи сотрудника.</div>
                 </div>
                 <div class="screenshot-block">
                     <div class="screenshot">
-                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+2:+Настройки" alt="Окно настроек">
-                        <div class="caption">Рис. 2 — Страница настроек профиля</div>
+                        <img src="media/mtdia2.png" alt="Страница регистрации" onerror="this.src='https://placehold.co/600x450/e2e8f0/334155?text=Страница+Регистрация'">
+                        <div class="caption">Рисунок 2.14 — Страница «Регистрация»</div>
                     </div>
                     <div class="description">
-                        <p>Откройте меню «Файл» → «Настройки». Во вкладке «Общие» укажите путь к рабочей папке. Затем перейдите в раздел «API / Подключения» и введите ключ доступа (выдан администратором).</p>
-                        <div class="code-block">
-                            API_KEY = "ваш_ключ_здесь"<br>
-                            BASE_URL = "https://api.example.com/v1"
+                        <p>После нажатия кнопки «Зарегистрироваться» открывается форма для ввода данных:</p>
+                        <ul>
+                            <li><strong>Имя</strong> (логин)</li>
+                            <li><strong>Пароль</strong></li>
+                            <li><strong>Роль</strong> — выберите должность (сотрудник, руководитель и т.д.)</li>
+                        </ul>
+                        <p>Завершите регистрацию нажатием кнопки <strong>«Зарегистрировать»</strong>. Успешная регистрация возвращает на экран авторизации.</p>
+                        <div class="info">💡 После регистрации можно войти, используя введённые имя и пароль.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. РЕГИСТРАЦИЯ АДМИНИСТРАТОРА (спец. процедура) -->
+            <section id="admin-reg" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Особая процедура</span>
+                    <h2 class="step-title">Регистрация администратора</h2>
+                    <div class="step-description">Подтверждение прав через технический отдел.</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="media/mtdia2.png" alt="Уведомление об успешной авторизации" onerror="this.src='https://placehold.co/600x200/e2e8f0/334155?text=Уведомление+об+успехе'">
+                        <div class="caption">Рисунок 2.15 — Уведомление об успешной авторизации</div>
+                    </div>
+                    <div class="description">
+                        <p><strong>Важно:</strong> Чтобы зарегистрировать учётную запись с правами администратора, сотрудник должен лично обратиться в технический отдел.</p>
+                        <ul>
+                            <li>Техотдел генерирует код подтверждения, который вводится при регистрации.</li>
+                            <li>После успешной проверки на электронную почту администратора отправляется код, который необходимо ввести для завершения регистрации.</li>
+                        </ul>
+                        <div class="warning">🔐 Только после двойного подтверждения (отдел + e-mail) роль администратора активируется.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. ПАНЕЛЬ УПРАВЛЕНИЯ АДМИНИСТРАТОРА -->
+            <section id="dashboard" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Панель администратора</span>
+                    <h2 class="step-title">Управление заявками</h2>
+                    <div class="step-description">Инструменты для контроля и назначения ответственных.</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="media/media4.png" alt="Панель управления администратора" onerror="this.src='https://placehold.co/800x400/e2e8f0/334155?text=Панель+управления'">
+                        <div class="caption">Рисунок 2.16 — Страница «Панель управления»</div>
+                    </div>
+                    <div class="description">
+                        <p>Интерфейс администратора позволяет:</p>
+                        <ul>
+                            <li>✏️ <strong>Редактировать</strong> заявки</li>
+                            <li>🗑️ <strong>Удалять</strong> заявки (с подтверждением)</li>
+                            <li>📌 <strong>Изменять статус</strong> заявки (в работе, выполнено, отклонено)</li>
+                            <li>👤 <strong>Назначать ответственных исполнителей</strong></li>
+                        </ul>
+                        <p>Все изменения сохраняются в журнале событий.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. УДАЛЕНИЕ ЗАЯВКИ (до и после) -->
+            <section id="delete-request" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Процедура удаления</span>
+                    <h2 class="step-title">Как удалить заявку</h2>
+                    <div class="step-description">Пошаговая инструкция с подтверждением.</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="two-screens" style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%;">
+                        <div class="screenshot">
+                            <img src="media/" alt="До удаления заявки" onerror="this.src='https://placehold.co/600x300/e2e8f0/334155?text=До+удаления+заявки'">
+                            <div class="caption">Рисунок 2.17 — До удаления заявки</div>
                         </div>
-                        <p>Нажмите «Проверить соединение». При успехе появится зелёный индикатор.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Шаг 3: пример с двумя скриншотами в одном блоке (можно карусель или два изображения) -->
-            <section id="step3" class="step-card">
-                <div class="step-header">
-                    <span class="step-number">Шаг 3</span>
-                    <h2 class="step-title">Основные действия</h2>
-                    <div class="step-description">
-                        Загрузка данных и визуализация.
-                    </div>
-                </div>
-                <div class="screenshot-block">
-                    <div class="screenshot">
-                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+3a:+Загрузка" alt="Кнопка загрузки">
-                        <div class="caption">Рис. 3a — Кнопка импорта</div>
-                    </div>
-                    <div class="screenshot">
-                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+3b:+Результат" alt="Результат обработки">
-                        <div class="caption">Рис. 3b — Визуализация отчёта</div>
-                    </div>
-                    <div class="description">
-                        <p>Нажмите <strong>«Загрузить файл»</strong> (поддерживаются CSV, JSON, XLSX). После успешной загрузки система отобразит предпросмотр. Для построения графика выберите нужные колонки и нажмите «Анализ».</p>
-                        <div class="warning">⚠️ Внимание: максимальный размер файла — 50 МБ. Для больших объёмов используйте пакетный режим.</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Шаг 4 -->
-            <section id="step4" class="step-card">
-                <div class="step-header">
-                    <span class="step-number">Шаг 4</span>
-                    <h2 class="step-title">Результат и примеры</h2>
-                    <div class="step-description">
-                        Экспорт отчётов и сохранение настроек.
-                    </div>
-                </div>
-                <div class="screenshot-block">
-                    <div class="screenshot">
-                        <img src="https://placehold.co/600x400/e2e8f0/334155?text=Скриншот+4:+Экспорт" alt="Экспорт отчёта">
-                        <div class="caption">Рис. 4 — Диалог экспорта</div>
-                    </div>
-                    <div class="description">
-                        <p>Готовый отчёт можно сохранить в PDF, Excel или CSV. Нажмите «Экспорт», выберите формат и место сохранения. Также вы можете <strong>сохранить текущий рабочий профиль</strong> для повторного использования.</p>
-                        <p><strong>Пример экспортированного отчёта:</strong></p>
-                        <div class="code-block">
-                            | Дата       | Показатель | Значение |<br>
-                            | 2026-04-01 | Доход      | 12500    |<br>
-                            | 2026-04-02 | Доход      | 13200    |
+                        <div class="screenshot">
+                            <img src="media/image6.png" alt="После удаления заявки" onerror="this.src='https://placehold.co/600x300/e2e8f0/334155?text=После+удаления+заявки'">
+                            <div class="caption">Рисунок 2.18 — После удаления заявки</div>
                         </div>
-                        <p>После завершения не забудьте выйти из аккаунта через меню «Профиль» → «Выйти».</p>
+                    </div>
+                    <div class="description" style="margin-top: 1rem;">
+                        <p><strong>Для удаления заявки администратору необходимо:</strong></p>
+                        <ol>
+                            <li>Нажать на значок 🗑️ (корзина) рядом с заявкой.</li>
+                            <li>В диалоговом окне <strong>подтвердить удаление</strong>.</li>
+                            <li>После подтверждения заявка окончательно удаляется из системы.</li>
+                        </ol>
+                        <div class="warning">⚠️ Удаление необратимо. Перед подтверждением убедитесь, что заявка больше не нужна.</div>
                     </div>
                 </div>
             </section>
 
-            <!-- Блок FAQ / Частые вопросы -->
+            <!-- 6. ВСЕ ЗАЯВКИ (история, реестр) -->
+            <section id="all-requests" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Реестр заявок</span>
+                    <h2 class="step-title">История всех обращений</h2>
+                    <div class="step-description">Раздел «Все заявки» — полный список поданных обращений.</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="media/image7.png" alt="Страница Все заявки" onerror="this.src='https://placehold.co/800x300/e2e8f0/334155?text=Все+заявки'">
+                        <div class="caption">Рисунок 2.19 — Страница «Все заявки»</div>
+                    </div>
+                    <div class="description">
+                        <p>В этом разделе представлен <strong>реестр всех поданных обращений</strong>. Доступны фильтры по дате, статусу и ответственному. Администратор может отслеживать полную историю заявок, а также экспортировать отчёт.</p>
+                        <ul>
+                            <li>Поиск по номеру заявки</li>
+                            <li>Сортировка по приоритету</li>
+                            <li>Просмотр подробной карточки заявки</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. НОВАЯ ЗАЯВКА -->
+            <section id="new-request" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Создание заявки</span>
+                    <h2 class="step-title">Подача новой заявки</h2>
+                    <div class="step-description">Интерфейс для пользователей (сотрудников).</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="media/image8.png" alt="Страница Новая заявка" onerror="this.src='https://placehold.co/1000x600/e2e8f0/334155?text=Новая+заявка'">
+                        <div class="caption">Рисунок 2.20 — Страница «Новая заявка»</div>
+                    </div>
+                    <div class="description">
+                        <p>Для создания заявки пользователю необходимо заполнить <strong>все обязательные поля формы</strong>:</p>
+                        <ul>
+                            <li>Объект</li>
+                            <li>Цех</li>
+                            <li>Техническое устройство</li>
+                            <li>Оборудование</li>
+                            <li>Приоритет</li>
+                            <li>Тип работ</li>
+                            <li>Описание заявки</li>
+                   
+
+                        </ul>
+                        <p>После заполнения нажмите кнопку «Отправить заявку». Система автоматически присвоит уникальный номер.</p>
+                        <div class="note">📌 После отправки администратор получит оповещение по e-mail (см. следующий раздел).</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. ПОЧТОВЫЕ УВЕДОМЛЕНИЯ -->
+            <section id="email-notify" class="step-card">
+                <div class="step-header">
+                    <span class="step-number">Система уведомлений</span>
+                    <h2 class="step-title">Оповещения на электронную почту</h2>
+                    <div class="step-description">Контроль всех действий через почту администратора.</div>
+                </div>
+                <div class="screenshot-block">
+                    <div class="screenshot">
+                        <img src="media/image9.png" alt="Уведомление на почту" onerror="this.src='https://placehold.co/500x350/e2e8f0/334155?text=Почтовое+уведомление'">
+                        <div class="caption">Рисунок 2.21 — Уведомление на почту</div>
+                    </div>
+                    <div class="description">
+                        <p><strong>Оповещение о новой заявке</strong> автоматически направляется администратору по электронной почте. Кроме того, система уведомлений обеспечивает контроль всех действий пользователей:</p>
+                        <ul>
+                            <li>✉️ Создание заявки → уведомление админу</li>
+                            <li>✉️ Изменение статуса заявки → уведомление автору и админу</li>
+                            <li>✉️ Назначение ответственного → уведомление исполнителю</li>
+                            <li>✉️ Удаление / редактирование → также фиксируется в почтовом журнале</li>
+                        </ul>
+                        <div class="info">📬 Рекомендуется проверить папку «Спам» при первом тестировании, чтобы настроить доверие к отправителю.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ БЛОК -->
             <section id="faq" class="step-card">
                 <div class="step-header">
-                    <span class="step-number">❓ FAQ</span>
-                    <h2 class="step-title">Частые вопросы и устранение неполадок</h2>
+                    <span class="step-number">❓ Поддержка</span>
+                    <h2 class="step-title">Частые вопросы и решения</h2>
                 </div>
                 <div style="padding: 1.5rem 2rem 2rem 2rem;">
-                    <p><strong>Вопрос:</strong> При загрузке файла возникает ошибка «Неверный формат»?</p>
-                    <p><strong>Ответ:</strong> Убедитесь, что файл соответствует UTF-8 кодировке и не содержит битых символов. Попробуйте пересохранить файл в Блокноте как UTF-8.</p>
+                    <p><strong>Вопрос:</strong> Я зарегистрировался, но не могу войти. Что делать?</p>
+                    <p><strong>Ответ:</strong> Проверьте правильность имени и пароля (учтите регистр). Если забыли пароль — используйте функцию «Восстановить пароль» на экране авторизации. При повторной проблеме обратитесь в техотдел.</p>
                     <hr>
-                    <p><strong>Вопрос:</strong> Где хранятся сохранённые профили?</p>
-                    <p><strong>Ответ:</strong> По умолчанию в папке `%APPDATA%\YourApp\profiles` (Windows) или `~/Library/Application Support/YourApp` (macOS).</p>
+                    <p><strong>Вопрос:</strong> Почему администратор не видит кнопки редактирования/удаления?</p>
+                    <p><strong>Ответ:</strong> Убедитесь, что вы вошли именно под учётной записью с ролью «Администратор». Обычные пользователи не имеют прав на управление заявками. Регистрация администратора возможна только через техотдел (см. раздел Особый вход).</p>
                     <hr>
-                    <p><strong>Вопрос:</strong> Скриншоты не отображаются, что делать?</p>
-                    <p><strong>Ответ:</strong> Замените ссылки-заглушки `https://placehold.co/...` на реальные пути к вашим изображениям. Рекомендуется хранить скриншоты в папке `images/` относительно HTML-файла.</p>
-                    <div class="note">📌 Если у вас остались вопросы, обратитесь в техподдержку: support@example.com</div>
+                    <p><strong>Вопрос:</strong> При регистрации администратора не приходит код на почту. Что делать?</p>
+                    <p><strong>Ответ:</strong> Проверьте папку «Спам», также убедитесь, что электронная почта указана верно. Если проблема повторяется — обратитесь в технический отдел лично, возможно, почтовый сервер заблокировал рассылку.</p>
+                    <hr>
+                    <p><strong>Вопрос:</strong> Можно ли восстановить удалённую заявку?</p>
+                    <p><strong>Ответ:</strong> Нет, удаление заявки окончательное. Система предупреждает перед подтверждением. Рекомендуется перед удалением экспортировать данные заявки из раздела «Все заявки».</p>
+                    <hr>
+                    <p><strong>Вопрос:</strong> Где найти историю изменений по заявке?</p>
+                    <p><strong>Ответ:</strong> Откройте карточку заявки — в ней присутствует вкладка «Журнал действий», где отображены все изменения статуса, назначения и комментарии.</p>
+                    <div class="note">📞 Техническая поддержка: support@ticketsystem.ru | Внутренний телефон: 1122</div>
                 </div>
             </section>
+
+            <div style="margin-top: 1rem; padding: 0.5rem; background: #f1f5f9; border-radius: 1rem; text-align: center; font-size: 0.9rem; color: #1e293b;">
+                ⚙️ Все описанные функции актуальны для версии приложения 2.0. Интерфейс может незначительно отличаться в зависимости от обновлений.
+            </div>
         </main>
     </div>
 
     <footer>
-        © 2026 Руководство пользователя. Все права защищены. Данные скриншоты являются иллюстративными.
+        © 2026 Система управления заявками. Инструкция разработана на основе официальной документации. Все изображения являются иллюстративными, реальный интерфейс может иметь незначительные отличия.
     </footer>
 </body>
 </html>
